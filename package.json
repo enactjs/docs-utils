@@ -1,0 +1,46 @@
+{
+  "name": "@enact/docs-utils",
+  "version": "0.1.0",
+  "description": "Utilities for parsing and validating JSDoc in Enact projects",
+  "main": "index.js",
+  "bin": {
+    "validate-docs": "index.js"
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/enactjs/docs-utils.git"
+  },
+  "keywords": [
+    "enact",
+    "docs",
+    "jsdoc",
+    "react"
+  ],
+  "author": "Roy Sutton <roy.sutton@lge.com>",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/enactjs/docs-utils/issues"
+  },
+  "homepage": "https://github.com/enactjs/docs-utils#readme",
+  "dependencies": {
+    "chalk": "^3.0.0",
+    "documentation": "^12.1.4",
+    "elasticlunr": "^0.9.5",
+    "gray-matter": "^4.0.2",
+    "jsonata": "^1.7.0",
+    "jsonfile": "^5.0.0",
+    "markdown-toc": "^1.2.0",
+    "minimist": "^1.2.0",
+    "mkdirp": "^1.0.3",
+    "progress": "^1.1.8",
+    "readdirp": "^2.2.1",
+    "shelljs": "^0.8.3"
+  },
+  "devDependencies": {
+    "eslint": "^6.8.0"
+  }
+}
