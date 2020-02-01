@@ -327,9 +327,12 @@ function prependTableOfContents (contents) {
  *	`README.md`
  */
 function copyStaticDocs ({source, outputTo: outputBase, getLibraryDescription = false}) {
-	const findCmdBase = '-type f -not -path "*/sampler/*" -not -path "*/node_modules/*" -not -path "*/build/*"';
-	const findCmd = getLibraryDescription ?
-		`find -L ${source} -iname "readme.md" -path "*/packages/*" ${findCmdBase}` : `find -L ${source} -path "*/docs/*" ${findCmdBase}`;
+	const findIgnores = '-type d -regex \'.*/(node_modules|build|sampler|samples|tests|coverage)\' -prune',
+		findBase = 'find -E -L',
+		findTarget = getLibraryDescription ? '-iname "readme.md"' : '-type f -path "*/docs/*"';
+
+	const findCmd = `${findBase} ${source} ${findIgnores} -o ${findTarget} -print`;
+
 	const docFiles = shelljs.exec(findCmd, {silent: true});
 	const files = docFiles.stdout.trim().split('\n');
 
