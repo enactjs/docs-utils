@@ -42,16 +42,15 @@ const allowedErrorTags = ['@curried', '@hoc', '@hocconfig', '@omit', '@required'
 /**
  * Scans the specified repos in the `raw` directory for files containing `@module`.
  *
- * @param {string[]} paths - An array of directories to scan for files
+ * @param {object[]} modules - An array of objects containing module configs
  * @param {string} [pattern=*.js] - An optional regex string to be used for filtering files
- * 	by default, `raw/enact/packages` will be scanned.
  * @returns {string[]} - A list of paths of matching files
  */
-const getValidFiles = (paths, pattern = '*.js') => {
+const getValidFiles = (modules, pattern = '*.js') => {
 	const files = [];
 
-	paths.forEach(path => {
-		const grepCmd = `grep -r -l "@module" ${path} --exclude-dir={build,node_modules,sampler,samples,tests,dist,coverage} --include=${pattern}`;
+	modules.forEach(moduleConfig => {
+		const grepCmd = `grep -r -l "@module" ${moduleConfig.path} --exclude-dir={build,node_modules,sampler,samples,tests,dist,coverage} --include=${pattern}`;
 		const moduleFiles = shelljs.exec(grepCmd, {silent: true});
 		Array.prototype.push.apply(files, moduleFiles.stdout.trim().split('\n'));
 	});
@@ -318,6 +317,39 @@ function prependTableOfContents (contents) {
 }
 
 /**
+ * Loads the docs config (if it exists) or creates a default config object based on best guess.
+ * The config object contains information that specifies how other docs information is loaded. It is
+ * expected to be in `/docs/config.json` in the working directory or in the specified path.
+ *
+ * @param {string} [path] - Parent directory of `/docs/config.json`
+ * @returns {object} Configuration object
+ */
+function getDocsConfig (path = process.cwd()) {
+	const configFilename = `${path}/docs/config.json`,
+		// don't parse CLI or eslint-config-enact for source
+		parseSource = (path.indexOf('/cli') + path.indexOf('eslint')) < 0,
+		defaultConfig = {
+			path,
+			hasPackageDir: fs.existsSync(`${path}/packages`),
+			hasConfig: fs.existsSync(configFilename),
+			parseSource
+		};
+	let config = {};
+
+	if (defaultConfig.hasConfig) {
+		try {
+			config = jsonfile.readFileSync(configFilename);
+		} catch (_) {
+			defaultConfig.hasConfig = false;
+			console.warn(`Error loading ${configFilename}, using default config`);
+			process.exitCode = 1;
+		}
+	}
+
+	return Object.assign({}, defaultConfig, config);
+}
+
+/**
  * Copies static (markdown) documentation from a library into the documentation site.
  *
  * @param {object} config
@@ -392,7 +424,8 @@ function copyStaticDocs ({source, outputTo: outputBase, getLibraryDescription = 
 
 /**
  * Generates an elasticlunr index from markdown files in `src/pages` and json files in
- * `src/pages/docs/modules`.
+ * `src/pages/docs/modules`. Also, for reasons unknown, writes out the library description file
+ * needed for the modules index page.
  *
  * @param {string} outputFilename - Filename for the generated index file
  */
@@ -511,7 +544,7 @@ function init () {
 		pattern = args.pattern;
 
 	if (standalone) {
-		const files = getValidFiles([path], pattern);
+		const files = getValidFiles([{path}], pattern);
 		getDocumentation(files, strict, true)
 			.then(() => postValidate(strict, true));
 	}
@@ -525,5 +558,6 @@ module.exports = {
 	postValidate,
 	copyStaticDocs,
 	generateDocVersion,
-	generateIndex
+	generateIndex,
+	getDocsConfig
 };
