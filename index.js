@@ -25,9 +25,7 @@ const shelljs = require('shelljs'),
 	parseArgs = require('minimist');
 
 const dataDir = 'src/data';
-const docVersionFile = `${dataDir}/docVersion.json`;
 const libraryDescriptionFile = `${dataDir}/libraryDescription.json`;
-const libraryDescription = {};
 const allRefs = {};
 const allStatics = [];
 const allLinks = {};
@@ -355,13 +353,11 @@ function getDocsConfig (path = process.cwd()) {
  * @param {object} config
  * @param {string} config.source - Path to search for docs directory (parent of docs dir)
  * @param {string} config.outputTo - Path to copy static docs
- * @param {boolean} [config.getLibraryDescription=false] - Extract package description from
- *	`README.md`
  */
-function copyStaticDocs ({source, outputTo: outputBase, getLibraryDescription = false}) {
+function copyStaticDocs ({source, outputTo: outputBase}) {
 	const findIgnores = '-type d -regex \'.*/(node_modules|build|sampler|samples|tests|coverage)\' -prune',
 		findBase = 'find -E -L',
-		findTarget = getLibraryDescription ? '-iname "readme.md"' : '-type f -path "*/docs/*"';
+		findTarget = '-type f -path "*/docs/*"';
 
 	const findCmd = `${findBase} ${source} ${findIgnores} -o ${findTarget} -print`;
 
@@ -377,7 +373,6 @@ function copyStaticDocs ({source, outputTo: outputBase, getLibraryDescription = 
 
 	files.forEach((file) => {
 		let outputPath = outputBase;
-		let currentLibrary = '';
 		const relativeFile = pathModule.relative(source, file);
 		const ext = pathModule.extname(relativeFile);
 		const base = pathModule.basename(relativeFile);
@@ -386,8 +381,7 @@ function copyStaticDocs ({source, outputTo: outputBase, getLibraryDescription = 
 		let githubUrl = `github: https://github.com/enactjs/${packageName}${relativeFile}\n`;
 
 		if (relativeFile.indexOf('docs') !== 0) {
-			currentLibrary = getLibraryDescription ? pathModule.dirname(relativeFile) : currentLibrary;
-			const librarypathModule = getLibraryDescription ? currentLibrary : pathModule.dirname(pathModule.relative('packages/', relativeFile)).replace('/docs', '');
+			const librarypathModule = pathModule.dirname(pathModule.relative('packages/', relativeFile)).replace('/docs', '');
 
 			outputPath += librarypathModule + '/';
 		} else {
@@ -399,6 +393,7 @@ function copyStaticDocs ({source, outputTo: outputBase, getLibraryDescription = 
 		// TODO: Filter links and fix them
 		// Normalize path because './' in outputPath blows up mkdir
 		shelljs.mkdir('-p', pathModule.normalize(outputPath));
+
 		if (ext === '.md') {
 			let contents = fs.readFileSync(file, 'utf8')
 				.replace(/(---\ntitle:.*)\n/, '$1\n' + githubUrl)
@@ -406,16 +401,9 @@ function copyStaticDocs ({source, outputTo: outputBase, getLibraryDescription = 
 				.replace(/(\((?!http)[^)]+)(.md)/g, '$1/');			// other .md files become new directory under root
 			if (file.indexOf('index.md') === -1) {
 				contents = contents.replace(/\]\(\.\//g, '](../');	// same level .md files are now relative to root
-				if (getLibraryDescription) {
-					// grabbing the description from the each library `README.MD` which is the sentence that starts with the character `>`. Adding each description into a js object.
-					const description = contents.split('\n')[2].split('> ')[1];
-					libraryDescription[currentLibrary] = description;
-				}
 			}
-			if (!getLibraryDescription) {
-				contents = prependTableOfContents(contents);
-				fs.writeFileSync(outputPath + base, contents, {encoding: 'utf8'});
-			}
+			contents = prependTableOfContents(contents);
+			fs.writeFileSync(outputPath + base, contents, {encoding: 'utf8'});
 		} else {
 			shelljs.cp(file, outputPath);
 		}
@@ -423,9 +411,92 @@ function copyStaticDocs ({source, outputTo: outputBase, getLibraryDescription = 
 }
 
 /**
+ * Extracts the library description(s) from the specified config.
+ * TODO: Extract enact dependency versions (for moonstone)?
+ *
+ * @param {object} moduleConfig - Config object
+ * @param {string} moduleConfig.path - Path to look in
+ * @param {boolean} moduleConfig.hasPackageDir - Whether to look in 'packages/' for descriptions
+ * @param {boolean} [strict] - If `true`, set process exit code on warnings
+ * @returns {object} - keys = library names  values = object {desc: description, version: version, etc.}
+ */
+function extractLibraryDescription ({path, hasPackageDir, ...moduleConfig}, strict) {
+	const output = {};
+	let libraryPaths;
+
+	if (hasPackageDir) {
+		const packageDir = pathModule.join(path, 'packages'),
+			filter = (entry => entry.isDirectory()
+				&& entry.name !== 'sampler'		// Ignore sampler
+				&& entry.name.charAt(0) !== '.');	// And hidden directories
+
+		libraryPaths = fs.readdirSync(packageDir, {withFileTypes: true})
+			.filter(filter)
+			.map(entry => ({
+				name: entry.name,
+				path: pathModule.join(packageDir, entry.name)
+			}));
+
+	} else {
+		libraryPaths = [{
+			name: path.split('/').slice(-1),
+			path
+		}];
+	}
+
+	// Load package.json for each to retrieve version and dependencies
+	// Then, if no description in moduleConfig, extract description from README.md in same
+	// directory. If not found, description in package.json will be used.
+	libraryPaths.forEach(({name, path}) => {
+		const packagePath = pathModule.join(path, 'package.json');
+		let packageJson;
+
+		try {
+			packageJson = jsonfile.readFileSync(packagePath);
+
+			const packageName = packageJson.name;
+
+			output[name] = {
+				packageName: packageName,
+				version: packageJson.version,
+				dependencies: packageJson.dependencies
+			};
+		} catch (_) {
+			if (strict) {
+				console.warn(`Unable to load package.json in ${path}!`);
+				process.exitCode = 1;
+			}
+			return;	// Don't process if no package.json
+		}
+
+		if (moduleConfig.description) {
+			output[name].description = moduleConfig.description;
+		} else {
+			const readmeFilename = pathModule.join(path, 'README.md');
+
+			try {
+				const contents = fs.readFileSync(readmeFilename, 'utf8');
+
+				// Grabbing description from `README.MD` by looking for first sentence that starts
+				// with the character `>`.
+				const description = contents.split('\n')[2].split('> ')[1];
+
+				output[name].description = description;
+			} catch (_) {}
+
+			// Unable to load description, use package.json
+			if (!output[name].description) {
+				output[name].description = packageJson.description;
+			}
+		}
+	});
+
+	return output;
+}
+
+/**
  * Generates an elasticlunr index from markdown files in `src/pages` and json files in
- * `src/pages/docs/modules`. Also, for reasons unknown, writes out the library description file
- * needed for the modules index page.
+ 	* `src/pages/docs/modules`.
  *
  * @param {string} outputFilename - Filename for the generated index file
  */
@@ -507,29 +578,16 @@ function generateIndex (docIndexFile) {
 			}
 		});
 	});
-	generateLibraryDescription();
 }
 
 function makeDataDir () {
 	mkdirp.sync(dataDir);
 }
 
-function generateLibraryDescription () {
-	const exportContent = JSON.stringify(libraryDescription);
+function saveLibraryDescriptions (descriptions) {
 	makeDataDir();
 	// generate a json file that contains the description to the corresponding libraries
-	fs.writeFileSync(libraryDescriptionFile, exportContent, {encoding: 'utf8'});
-}
-
-/**
- * Generates a json file with the current Enact version number as read from raw/enact/package.json
- * TODO: Generate this for all scanned packages
- */
-function generateDocVersion () {
-	const packageInfo = jsonfile.readFileSync('raw/enact/package.json');
-	const version = JSON.stringify({docVersion: packageInfo.version});
-	makeDataDir(); // just in case
-	fs.writeFileSync(docVersionFile, version, {encoding: 'utf8'});
+	jsonfile.writeFileSync(libraryDescriptionFile, descriptions);
 }
 
 /**
@@ -557,7 +615,8 @@ module.exports = {
 	getDocumentation,
 	postValidate,
 	copyStaticDocs,
-	generateDocVersion,
 	generateIndex,
-	getDocsConfig
+	getDocsConfig,
+	extractLibraryDescription,
+	saveLibraryDescriptions
 };
