@@ -53,6 +53,7 @@ const getValidFiles = (paths, pattern = '*.js') => {
 		findBase = 'find -E -L',
 		findTarget = `-o -type f -name '${pattern}' -print0`;
 
+	console.log(shelljs.exec('which grep', {silent: true}));
 	paths.forEach(path => {
 		// Travis build directory includes 'build', which would be ignored
 		const relativePath = pathModule.relative(process.cwd(), path) || '.';
