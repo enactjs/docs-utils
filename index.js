@@ -47,7 +47,7 @@ const allowedErrorTags = ['@curried', '@hoc', '@hocconfig', '@omit', '@required'
  * 	by default, `raw/enact/packages` will be scanned.
  * @returns {string[]} - A list of paths of matching files
  */
-const getValidFiles = (paths, pattern = '*.js') => {
+const getValidFiles = (paths, pattern = '\\*.js') => {
 	const files = [];
 
 	paths.forEach(path => {
