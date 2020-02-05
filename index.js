@@ -47,15 +47,18 @@ const allowedErrorTags = ['@curried', '@hoc', '@hocconfig', '@omit', '@required'
  * 	by default, `raw/enact/packages` will be scanned.
  * @returns {string[]} - A list of paths of matching files
  */
-const getValidFiles = (paths, pattern = '\\*.js') => {
+const getValidFiles = (paths, pattern = '*.js') => {
 	const files = [];
+	const findIgnores = '-type d -regex \'.*/(node_modules|build|sampler|samples|tests|coverage)\' -prune',
+		findBase = 'find -E -L',
+		findTarget = `-o -type f -name '${pattern}' -print0`;
 
 	paths.forEach(path => {
-		const relativePath = pathModule.relative(process.cwd(), path);
-		const grepCmd = `grep -R -l "@module" ${relativePath} --exclude-dir={build,node_modules,sampler,samples,tests,dist,coverage} --include=${pattern}`;
-		const moduleFiles = shelljs.exec(grepCmd, {silent: true});
+		const grepCmd = `xargs -0 grep -l "@module"`,
+			command = `${findBase} ${path} ${findIgnores} ${findTarget} | ${grepCmd}`;
+		const moduleFiles = shelljs.exec(command, {silent: true});
 		Array.prototype.push.apply(files, moduleFiles.stdout.trim().split('\n'));
-		console.log(grepCmd);
+		console.log(command);
 	});
 
 	console.log(files);
