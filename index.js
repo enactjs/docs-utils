@@ -54,9 +54,9 @@ const getValidFiles = (paths, pattern = '*.js') => {
 		const grepCmd = `grep -r -l "@module" ${path} --exclude-dir={build,node_modules,sampler,samples,tests,dist,coverage} --include=${pattern}`;
 		const moduleFiles = shelljs.exec(grepCmd, {silent: true});
 		Array.prototype.push.apply(files, moduleFiles.stdout.trim().split('\n'));
+		console.log(grepCmd);
 	});
 
-	console.log(grepCmd);
 	console.log(files);
 
 	return files;
