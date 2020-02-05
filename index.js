@@ -56,6 +56,9 @@ const getValidFiles = (paths, pattern = '*.js') => {
 		Array.prototype.push.apply(files, moduleFiles.stdout.trim().split('\n'));
 	});
 
+	console.log(grepCmd);
+	console.log(files);
+
 	return files;
 };
 
