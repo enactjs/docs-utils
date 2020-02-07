@@ -372,7 +372,7 @@ function copyStaticDocs ({source, outputTo: outputBase}) {
 	console.log(`Processing ${source}`);	// eslint-disable-line no-console
 
 	files.forEach((file) => {
-		let outputPath = outputBase;
+		let outputPath = outputBase + '/';
 		const relativeFile = pathModule.relative(source, file);
 		const ext = pathModule.extname(relativeFile);
 		const base = pathModule.basename(relativeFile);
