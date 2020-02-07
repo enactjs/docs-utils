@@ -420,15 +420,15 @@ function copyStaticDocs ({source, outputTo: outputBase}) {
  * @param {boolean} [strict] - If `true`, set process exit code on warnings
  * @returns {object} - keys = library names  values = object {desc: description, version: version, etc.}
  */
-function extractLibraryDescription ({path, hasPackageDir, ...moduleConfig}, strict) {
+function extractLibraryDescription ({path, hasPackageDir, description}, strict) {
 	const output = {};
 	let libraryPaths;
 
 	if (hasPackageDir) {
 		const packageDir = pathModule.join(path, 'packages'),
-			filter = (entry => entry.isDirectory()
-				&& entry.name !== 'sampler'		// Ignore sampler
-				&& entry.name.charAt(0) !== '.');	// And hidden directories
+			filter = (entry => entry.isDirectory() &&
+				entry.name !== 'sampler' &&		// Ignore sampler
+				entry.name.charAt(0) !== '.');	// And hidden directories
 
 		libraryPaths = fs.readdirSync(packageDir, {withFileTypes: true})
 			.filter(filter)
@@ -447,8 +447,8 @@ function extractLibraryDescription ({path, hasPackageDir, ...moduleConfig}, stri
 	// Load package.json for each to retrieve version and dependencies
 	// Then, if no description in moduleConfig, extract description from README.md in same
 	// directory. If not found, description in package.json will be used.
-	libraryPaths.forEach(({name, path}) => {
-		const packagePath = pathModule.join(path, 'package.json');
+	libraryPaths.forEach(({name, path: libPath}) => {
+		const packagePath = pathModule.join(libPath, 'package.json');
 		let packageJson;
 
 		try {
@@ -463,25 +463,25 @@ function extractLibraryDescription ({path, hasPackageDir, ...moduleConfig}, stri
 			};
 		} catch (_) {
 			if (strict) {
-				console.warn(`Unable to load package.json in ${path}!`);
+				console.warn(`Unable to load package.json in ${libPath}!`);
 				process.exitCode = 1;
 			}
 			return;	// Don't process if no package.json
 		}
 
-		if (moduleConfig.description) {
-			output[name].description = moduleConfig.description;
+		if (description) {
+			output[name].description = description;
 		} else {
-			const readmeFilename = pathModule.join(path, 'README.md');
+			const readmeFilename = pathModule.join(libPath, 'README.md');
 
 			try {
 				const contents = fs.readFileSync(readmeFilename, 'utf8');
 
 				// Grabbing description from `README.MD` by looking for first sentence that starts
 				// with the character `>`.
-				const description = contents.split('\n')[2].split('> ')[1];
+				const readmeDescription = contents.split('\n')[2].split('> ')[1];
 
-				output[name].description = description;
+				output[name].description = readmeDescription;
 			} catch (_) {}
 
 			// Unable to load description, use package.json
