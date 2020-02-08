@@ -11,6 +11,7 @@
 
 const shelljs = require('shelljs'),
 	fs = require('fs'),
+	os = require('os'),
 	pathModule = require('path'),
 	ProgressBar = require('progress'),
 	documentation = require('documentation'),
@@ -356,7 +357,8 @@ function getDocsConfig (path = process.cwd()) {
  */
 function copyStaticDocs ({source, outputTo: outputBase}) {
 	const findIgnores = '-type d -regex \'.*/(node_modules|build|sampler|samples|tests|coverage)\' -prune',
-		findBase = 'find -E -L',
+		// MacOS find command uses non-standard -E for regex type
+		findBase = 'find -L' + (os.platform() === 'darwin' ? ' -E' : ''),
 		findTarget = '-type f -path "*/docs/*"';
 
 	const findCmd = `${findBase} ${source} ${findIgnores} -o ${findTarget} -print`;
