@@ -349,13 +349,14 @@ function getDocsConfig (path = process.cwd()) {
 }
 
 /**
- * Copies static (markdown) documentation from a library into the documentation site.
+ * Copies static (markdown) documentation from a library into the documentation site. Also copies an
+ * icon to the static directory, if specified in the config.
  *
  * @param {object} config
  * @param {string} config.source - Path to search for docs directory (parent of docs dir)
  * @param {string} config.outputTo - Path to copy static docs
  */
-function copyStaticDocs ({source, outputTo: outputBase}) {
+function copyStaticDocs ({source, outputTo: outputBase, icon}) {
 	const findIgnores = '-type d -regex \'.*/(node_modules|build|sampler|samples|tests|coverage)\' -prune',
 		// MacOS find command uses non-standard -E for regex type
 		findBase = 'find -L' + (os.platform() === 'darwin' ? ' -E' : ''),
@@ -381,6 +382,8 @@ function copyStaticDocs ({source, outputTo: outputBase}) {
 		// Cheating, discard 'raw' and get directory name -- this will work with 'enact/packages'
 		const packageName = source.replace(/raw\/([^/]*)\/(.*)?/, '$1/blob/develop/$2');
 		let githubUrl = `github: https://github.com/enactjs/${packageName}${relativeFile}\n`;
+
+		if (base === 'config.json') return;
 
 		if (relativeFile.indexOf('docs') !== 0) {
 			const librarypathModule = pathModule.dirname(pathModule.relative('packages/', relativeFile)).replace('/docs', '');
@@ -409,6 +412,12 @@ function copyStaticDocs ({source, outputTo: outputBase}) {
 		} else {
 			shelljs.cp(file, outputPath);
 		}
+
+		if (icon) {
+			const iconSource = `${source}/docs/${icon}`;
+
+			shelljs.cp(iconSource, './static/');
+		}
 	});
 }
 
@@ -422,7 +431,7 @@ function copyStaticDocs ({source, outputTo: outputBase}) {
  * @param {boolean} [strict] - If `true`, set process exit code on warnings
  * @returns {object} - keys = library names  values = object {desc: description, version: version, etc.}
  */
-function extractLibraryDescription ({path, hasPackageDir, description}, strict) {
+function extractLibraryDescription ({path, hasPackageDir, description, icon}, strict) {
 	const output = {};
 	let libraryPaths;
 
@@ -461,7 +470,8 @@ function extractLibraryDescription ({path, hasPackageDir, description}, strict) 
 			output[name] = {
 				packageName: packageName,
 				version: packageJson.version,
-				dependencies: packageJson.dependencies
+				dependencies: packageJson.dependencies,
+				icon
 			};
 		} catch (_) {
 			if (strict) {
