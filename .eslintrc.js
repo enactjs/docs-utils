@@ -10,6 +10,9 @@ module.exports = {
 		'node': true,
 		'mocha': true
 	},
+	parserOptions: {
+		'ecmaVersion': 2018,
+	},
 	root: true,
 	extends: ['eslint:recommended'],
 	rules: {
