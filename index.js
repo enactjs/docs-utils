@@ -428,10 +428,11 @@ function copyStaticDocs ({source, outputTo: outputBase, icon}) {
  * @param {object} moduleConfig - Config object
  * @param {string} moduleConfig.path - Path to look in
  * @param {boolean} moduleConfig.hasPackageDir - Whether to look in 'packages/' for descriptions
+ * @param {string} moduleConfig.description - Description
  * @param {boolean} [strict] - If `true`, set process exit code on warnings
  * @returns {object} - keys = library names  values = object {desc: description, version: version, etc.}
  */
-function extractLibraryDescription ({path, hasPackageDir, description, icon}, strict) {
+function extractLibraryDescription ({path, hasPackageDir, description, ...rest}, strict) {
 	const output = {};
 	let libraryPaths;
 
@@ -471,7 +472,7 @@ function extractLibraryDescription ({path, hasPackageDir, description, icon}, st
 				packageName: packageName,
 				version: packageJson.version,
 				dependencies: packageJson.dependencies,
-				icon
+				...rest
 			};
 		} catch (_) {
 			if (strict) {
