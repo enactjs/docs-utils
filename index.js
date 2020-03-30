@@ -68,7 +68,7 @@ const getValidFiles = (modules, pattern = '*.js') => {
  * @returns {Promise[]} - An array of promises that represent the scanning process
  */
 const getDocumentation = (paths, strict, noSave) => {
-	const docOutputPath = '/src/pages/docs/modules';
+	const docOutputPath = pathModule.join('src', 'pages', 'docs', 'modules');
 	// TODO: Add @module to all files and scan files and combine json
 	const validPaths = paths.reduce((prev, path) => {
 		return prev.add(path.split('/').slice(0, -1).join('/'));
@@ -81,7 +81,7 @@ const getDocumentation = (paths, strict, noSave) => {
 	validPaths.forEach(function (path) {
 		// TODO: If we do change it to scan each file rather than directory we need to fix componentDirectory matching
 		let componentDirectory = path.split('packages/')[1] || path.split('raw/')[1] || path.split('/').slice(-2).join('/');
-		const basePath = process.cwd() + docOutputPath;
+		const basePath = pathModule.join(process.cwd(), docOutputPath);
 		// Check for 'spotlight/src' and anything similar
 		let componentDirParts = componentDirectory && componentDirectory.split('/');
 		if ((Array.isArray(componentDirParts) && componentDirParts.length > 1) && (componentDirParts.pop() === 'src')) {
@@ -95,7 +95,7 @@ const getDocumentation = (paths, strict, noSave) => {
 				validate(output, componentDirectory, strict);
 
 				if (!noSave) {
-					const outputPath = basePath + '/' + componentDirectory;
+					const outputPath = pathModule.join(basePath, componentDirectory);
 					shelljs.mkdir('-p', outputPath);
 					const stringified = JSON.stringify(output, (k, v) => {
 						if (k === 'errors' && v.length !== 0) {
@@ -113,7 +113,7 @@ const getDocumentation = (paths, strict, noSave) => {
 						return (keysToIgnore.includes(k)) ? void 0 : v;
 					}, 2);
 
-					fs.writeFileSync(outputPath + '/index.json', stringified, 'utf8');
+					fs.writeFileSync(pathModule.join(outputPath, 'index.json'), stringified, 'utf8');
 				}
 			}
 		}).catch((err) => {
@@ -349,13 +349,14 @@ function getDocsConfig (path = process.cwd()) {
 }
 
 /**
- * Copies static (markdown) documentation from a library into the documentation site.
+ * Copies static (markdown) documentation from a library into the documentation site. Also copies an
+ * icon to the static directory, if specified in the config.
  *
  * @param {object} config
  * @param {string} config.source - Path to search for docs directory (parent of docs dir)
  * @param {string} config.outputTo - Path to copy static docs
  */
-function copyStaticDocs ({source, outputTo: outputBase}) {
+function copyStaticDocs ({source, outputTo: outputBase, icon}) {
 	const findIgnores = '-type d -regex \'.*/(node_modules|build|sampler|samples|tests|coverage)\' -prune',
 		// MacOS find command uses non-standard -E for regex type
 		findBase = 'find -L' + (os.platform() === 'darwin' ? ' -E' : ''),
@@ -374,7 +375,7 @@ function copyStaticDocs ({source, outputTo: outputBase}) {
 	console.log(`Processing ${source}`);	// eslint-disable-line no-console
 
 	files.forEach((file) => {
-		let outputPath = outputBase + '/';
+		let outputPath = outputBase;
 		const relativeFile = pathModule.relative(source, file);
 		const ext = pathModule.extname(relativeFile);
 		const base = pathModule.basename(relativeFile);
@@ -382,14 +383,16 @@ function copyStaticDocs ({source, outputTo: outputBase}) {
 		const packageName = source.replace(/raw\/([^/]*)\/(.*)?/, '$1/blob/develop/$2');
 		let githubUrl = `github: https://github.com/enactjs/${packageName}${relativeFile}\n`;
 
+		if (base === 'config.json') return;
+
 		if (relativeFile.indexOf('docs') !== 0) {
 			const librarypathModule = pathModule.dirname(pathModule.relative('packages/', relativeFile)).replace('/docs', '');
 
-			outputPath += librarypathModule + '/';
+			outputPath = pathModule.join(outputPath, librarypathModule);
 		} else {
 			const pathPart = pathModule.dirname(pathModule.relative('docs/', relativeFile));
 
-			outputPath += pathPart + '/';
+			outputPath = pathModule.join(outputPath, pathPart);
 		}
 
 		// TODO: Filter links and fix them
@@ -405,9 +408,15 @@ function copyStaticDocs ({source, outputTo: outputBase}) {
 				contents = contents.replace(/\]\(\.\//g, '](../');	// same level .md files are now relative to root
 			}
 			contents = prependTableOfContents(contents);
-			fs.writeFileSync(outputPath + base, contents, {encoding: 'utf8'});
+			fs.writeFileSync(pathModule.join(outputPath, base), contents, {encoding: 'utf8'});
 		} else {
 			shelljs.cp(file, outputPath);
+		}
+
+		if (icon) {
+			const iconSource = pathModule.join(source, 'docs', icon);
+
+			shelljs.cp(iconSource, './static/');
 		}
 	});
 }
@@ -419,10 +428,11 @@ function copyStaticDocs ({source, outputTo: outputBase}) {
  * @param {object} moduleConfig - Config object
  * @param {string} moduleConfig.path - Path to look in
  * @param {boolean} moduleConfig.hasPackageDir - Whether to look in 'packages/' for descriptions
+ * @param {string} moduleConfig.description - Description
  * @param {boolean} [strict] - If `true`, set process exit code on warnings
  * @returns {object} - keys = library names  values = object {desc: description, version: version, etc.}
  */
-function extractLibraryDescription ({path, hasPackageDir, description}, strict) {
+function extractLibraryDescription ({path, hasPackageDir, description, ...rest}, strict) {
 	const output = {};
 	let libraryPaths;
 
@@ -441,7 +451,7 @@ function extractLibraryDescription ({path, hasPackageDir, description}, strict) 
 
 	} else {
 		libraryPaths = [{
-			name: path.split('/').slice(-1),
+			name: path.split(pathModule.sep).slice(-1),
 			path
 		}];
 	}
@@ -461,7 +471,8 @@ function extractLibraryDescription ({path, hasPackageDir, description}, strict) 
 			output[name] = {
 				packageName: packageName,
 				version: packageJson.version,
-				dependencies: packageJson.dependencies
+				dependencies: packageJson.dependencies,
+				...rest
 			};
 		} catch (_) {
 			if (strict) {
