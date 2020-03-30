@@ -68,7 +68,7 @@ const getValidFiles = (modules, pattern = '*.js') => {
  * @returns {Promise[]} - An array of promises that represent the scanning process
  */
 const getDocumentation = (paths, strict, noSave) => {
-	const docOutputPath = '/src/pages/docs/modules';
+	const docOutputPath = pathModule.join('src', 'pages', 'docs', 'modules');
 	// TODO: Add @module to all files and scan files and combine json
 	const validPaths = paths.reduce((prev, path) => {
 		return prev.add(path.split('/').slice(0, -1).join('/'));
@@ -81,7 +81,7 @@ const getDocumentation = (paths, strict, noSave) => {
 	validPaths.forEach(function (path) {
 		// TODO: If we do change it to scan each file rather than directory we need to fix componentDirectory matching
 		let componentDirectory = path.split('packages/')[1] || path.split('raw/')[1] || path.split('/').slice(-2).join('/');
-		const basePath = process.cwd() + docOutputPath;
+		const basePath = pathModule.join(process.cwd(), docOutputPath);
 		// Check for 'spotlight/src' and anything similar
 		let componentDirParts = componentDirectory && componentDirectory.split('/');
 		if ((Array.isArray(componentDirParts) && componentDirParts.length > 1) && (componentDirParts.pop() === 'src')) {
@@ -95,7 +95,7 @@ const getDocumentation = (paths, strict, noSave) => {
 				validate(output, componentDirectory, strict);
 
 				if (!noSave) {
-					const outputPath = basePath + '/' + componentDirectory;
+					const outputPath = pathModule.join(basePath, componentDirectory);
 					shelljs.mkdir('-p', outputPath);
 					const stringified = JSON.stringify(output, (k, v) => {
 						if (k === 'errors' && v.length !== 0) {
@@ -113,7 +113,7 @@ const getDocumentation = (paths, strict, noSave) => {
 						return (keysToIgnore.includes(k)) ? void 0 : v;
 					}, 2);
 
-					fs.writeFileSync(outputPath + '/index.json', stringified, 'utf8');
+					fs.writeFileSync(pathModule.join(outputPath, 'index.json'), stringified, 'utf8');
 				}
 			}
 		}).catch((err) => {
@@ -375,7 +375,7 @@ function copyStaticDocs ({source, outputTo: outputBase, icon}) {
 	console.log(`Processing ${source}`);	// eslint-disable-line no-console
 
 	files.forEach((file) => {
-		let outputPath = outputBase + '/';
+		let outputPath = outputBase;
 		const relativeFile = pathModule.relative(source, file);
 		const ext = pathModule.extname(relativeFile);
 		const base = pathModule.basename(relativeFile);
@@ -388,11 +388,11 @@ function copyStaticDocs ({source, outputTo: outputBase, icon}) {
 		if (relativeFile.indexOf('docs') !== 0) {
 			const librarypathModule = pathModule.dirname(pathModule.relative('packages/', relativeFile)).replace('/docs', '');
 
-			outputPath += librarypathModule + '/';
+			outputPath = pathModule.join(outputPath, librarypathModule);
 		} else {
 			const pathPart = pathModule.dirname(pathModule.relative('docs/', relativeFile));
 
-			outputPath += pathPart + '/';
+			outputPath = pathModule.join(outputPath, pathPart);
 		}
 
 		// TODO: Filter links and fix them
@@ -408,7 +408,7 @@ function copyStaticDocs ({source, outputTo: outputBase, icon}) {
 				contents = contents.replace(/\]\(\.\//g, '](../');	// same level .md files are now relative to root
 			}
 			contents = prependTableOfContents(contents);
-			fs.writeFileSync(outputPath + base, contents, {encoding: 'utf8'});
+			fs.writeFileSync(pathModule.join(outputPath, base), contents, {encoding: 'utf8'});
 		} else {
 			shelljs.cp(file, outputPath);
 		}
@@ -451,7 +451,7 @@ function extractLibraryDescription ({path, hasPackageDir, description, ...rest},
 
 	} else {
 		libraryPaths = [{
-			name: path.split('/').slice(-1),
+			name: path.split(pathModule.sep).slice(-1),
 			path
 		}];
 	}
