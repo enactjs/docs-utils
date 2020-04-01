@@ -416,6 +416,7 @@ function copyStaticDocs ({source, outputTo: outputBase, icon}) {
 		if (icon) {
 			const iconSource = pathModule.join(source, 'docs', icon);
 
+			shelljs.mkdir('-p', pathModule.normalize('./static/'));
 			shelljs.cp(iconSource, './static/');
 		}
 	});
