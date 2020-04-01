@@ -25,6 +25,9 @@
   ],
   "author": "Roy Sutton <roy.sutton@lge.com>",
   "license": "Apache-2.0",
+  "publishConfig": {
+    "access": "public"
+  },
   "bugs": {
     "url": "https://github.com/enactjs/docs-utils/issues"
   },
