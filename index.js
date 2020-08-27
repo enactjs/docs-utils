@@ -163,7 +163,7 @@ function validate (docs, componentDirectory, strict) {
 	}
 
 	// Find all @see tags with the context of the owner, return object with arrays of tags/context
-	const findSees = '**.*[tags[title="see"]] {"tags": [tags[title="see"]], "context": [context]}',
+	const findSees = '**[tags[title="see"]] {"tags": [tags[title="see"]], "context": [context]}',
 		validSee = /({@link|http)/,
 		findLinks = "**[type='link'].url[]";
 		// TODO: findLinks with context: http://try.jsonata.org/BJv4E4UgL
