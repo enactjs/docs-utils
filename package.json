@@ -34,7 +34,7 @@
   "homepage": "https://github.com/enactjs/docs-utils#readme",
   "dependencies": {
     "chalk": "^3.0.0",
-    "documentation": "^12.1.4",
+    "documentation": "^12.3.0",
     "elasticlunr": "^0.9.5",
     "gray-matter": "^4.0.2",
     "jsonata": "^1.7.0",
