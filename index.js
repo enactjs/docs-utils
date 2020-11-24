@@ -49,7 +49,18 @@ const getValidFiles = (modules, pattern = '*.js') => {
 	const files = [];
 
 	modules.forEach(moduleConfig => {
-		const grepCmd = `grep -r -l "@module" ${moduleConfig.path} --exclude-dir={build,node_modules,sampler,samples,tests,dist,coverage} --include=${pattern}`;
+		const grepCmd = `
+			grep -r -l "@module" \
+				${moduleConfig.path} \
+				--exclude-dir=build \
+				--exclude-dir=node_modules \
+				--exclude-dir=sampler \
+				--exclude-dir=samples \
+				--exclude-dir=tests \
+				--exclude-dir=dist \
+				--exclude-dir=coverage \
+				--include=${pattern}
+		`;
 		const moduleFiles = shelljs.exec(grepCmd, {silent: true});
 		Array.prototype.push.apply(files, moduleFiles.stdout.trim().split('\n'));
 	});
