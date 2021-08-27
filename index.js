@@ -47,9 +47,20 @@ const allowedErrorTags = ['@curried', '@hoc', '@hocconfig', '@omit', '@required'
  */
 const getValidFiles = (modules, pattern = '*.js') => {
 	const files = [];
+	let moduleFiles;
 
 	modules.forEach(moduleConfig => {
-		const grepCmd = `
+
+		console.log(moduleConfig.path);
+		let cmd;
+		let pathWin32 = moduleConfig.path.replace("/", "\\" )
+		if(os.platform() === 'win32') {
+			cmd = `dir ${pathWin32}\\${pattern} /S /B | findstr /F:/ @module /v /i /m  /C:"node_modules" /C:"build" /C:"sampler" /C:"samples"  /C:"tests"  /C:"dist"  /C:"coverage"`;
+			console.log(cmd);
+			moduleFiles = shelljs.exec(cmd, {silent: true});
+			Array.prototype.push.apply(files, moduleFiles.stdout.trim().split('\r\n'));
+		} else {
+			cmd = `
 			grep -r -l "@module" \
 				${moduleConfig.path} \
 				--exclude-dir=build \
@@ -61,8 +72,12 @@ const getValidFiles = (modules, pattern = '*.js') => {
 				--exclude-dir=coverage \
 				--include=${pattern}
 		`;
-		const moduleFiles = shelljs.exec(grepCmd, {silent: true});
-		Array.prototype.push.apply(files, moduleFiles.stdout.trim().split('\n'));
+			moduleFiles = shelljs.exec(cmd, {silent: true});
+			Array.prototype.push.apply(files, moduleFiles.stdout.trim().split('\n'));
+		}
+console.log(files);
+
+
 	});
 
 	return files;
@@ -79,6 +94,7 @@ const getValidFiles = (modules, pattern = '*.js') => {
  * @returns {Promise[]} - An array of promises that represent the scanning process
  */
 const getDocumentation = (paths, strict, noSave) => {
+	console.log(paths);
 	const docOutputPath = pathModule.join('src', 'pages', 'docs', 'modules');
 	// TODO: Add @module to all files and scan files and combine json
 	const validPaths = paths.reduce((prev, path) => {
@@ -90,16 +106,19 @@ const getDocumentation = (paths, strict, noSave) => {
 		{total: validPaths.size, width: 20, complete: '#', incomplete: ' '});
 
 	validPaths.forEach(function (path) {
+		//console.log(path);
 		// TODO: If we do change it to scan each file rather than directory we need to fix componentDirectory matching
 		let componentDirectory = path.split('packages/')[1] || path.split('raw/')[1] || path.split('/').slice(-2).join('/');
 		const basePath = pathModule.join(process.cwd(), docOutputPath);
 		// Check for 'spotlight/src' and anything similar
+		//console.log(componentDirectory);
 		let componentDirParts = componentDirectory && componentDirectory.split('/');
 		if ((Array.isArray(componentDirParts) && componentDirParts.length > 1) && (componentDirParts.pop() === 'src')) {
 			componentDirectory = componentDirParts.join('/');
 		}
 
 		promises.push(documentation.build(path, {shallow: true}).then(output => {
+			console.log(componentDirectory);
 			bar.tick({file: componentDirectory});
 			if (output.length) {
 
@@ -133,6 +152,7 @@ const getDocumentation = (paths, strict, noSave) => {
 			bar.tick({file: componentDirectory});
 		}));
 	});
+	console.log("6");
 	return Promise.all(promises);
 };
 
@@ -236,6 +256,7 @@ function validate (docs, componentDirectory, strict) {
 	allModules.push(docs[0].name);
 	const library = docs[0].name.split('/')[0];
 	allLibraries[library] = true;
+
 }
 
 /**
@@ -290,6 +311,7 @@ function postValidate (strict, ignoreExternal) {
 }
 
 function parseTableOfContents (frontMatter, body) {
+
 	let maxdepth = 2;
 	const tocConfig = frontMatter.match(/^toc: ?(\d+)$/m);
 	if (tocConfig) {
@@ -368,17 +390,40 @@ function getDocsConfig (path = process.cwd()) {
  * @param {string} config.outputTo - Path to copy static docs
  */
 function copyStaticDocs ({source, outputTo: outputBase, icon}) {
-	const findIgnores = '-type d -regex \'.*/(node_modules|build|sampler|samples|tests|coverage)\' -prune',
-		// MacOS find command uses non-standard -E for regex type
-		findBase = 'find -L' + (os.platform() === 'darwin' ? ' -E' : ''),
-		findTarget = '-type f -path "*/docs/*"';
+	let findCmd, docFiles, files = [];
+console.log(source);
+	if (os.platform() === 'win32') {
+		const sourceWin32 = source.replace("/", "\\")
 
-	const findCmd = `${findBase} ${source} ${findIgnores} -o ${findTarget} -print`;
+		const findBase1 = 'dir',
+			findBase2 = '\\*docs /S /B /AD';
 
-	const docFiles = shelljs.exec(findCmd, {silent: true});
-	const files = docFiles.stdout.trim().split('\n');
+		const findCmdDir = `${findBase1} ${sourceWin32}${findBase2}`;
+		const docsDirs = shelljs.exec(findCmdDir, {silent: true});
+		const dirs = docsDirs.stdout.trim().split('\r\n');
+
+		for ( let dir of dirs) {
+			const findCmdFiles = `dir ${dir} /S /B /A-D`;
+			const docFilesTemp = shelljs.exec(findCmdFiles, {silent: true});
+			const filesTemp = docFilesTemp.stdout.trim().split('\r\n')
+
+			for(const file of filesTemp) {
+				files.push(file);
+			}
+		}
+	} else {
+		const findIgnores = '-type d -regex \'.*/(node_modules|build|sampler|samples|tests|coverage)\' -prune',
+			// MacOS find command uses non-standard -E for regex type
+			findBase = 'find -L' + (os.platform() === 'darwin' ? ' -E' : ''),
+			findTarget = '-type f -path "*/docs/*"';
+
+		findCmd = `${findBase} ${source} ${findIgnores} -o ${findTarget} -print`;
+		docFiles = shelljs.exec(findCmd, {silent: true});
+		files = docFiles.stdout.trim().split('\n');
+	}
 
 	if ((files.length < 1) || !files[0]) {	// Empty search has single empty string in array
+
 		console.error('Unable to find docs in', source);	// eslint-disable-line no-console
 		process.exit(2);
 	}
@@ -386,13 +431,17 @@ function copyStaticDocs ({source, outputTo: outputBase, icon}) {
 	console.log(`Processing ${source}`);	// eslint-disable-line no-console
 
 	files.forEach((file) => {
+		const sourceWin32 = source.replace("/", "\\")
+
 		let outputPath = outputBase;
-		const relativeFile = pathModule.relative(source, file);
+		const relativeFile = pathModule.relative(sourceWin32, file).replace("\\", "/");
+
 		const ext = pathModule.extname(relativeFile);
 		const base = pathModule.basename(relativeFile);
 		// Cheating, discard 'raw' and get directory name -- this will work with 'enact/packages'
 		const packageName = source.replace(/raw\/([^/]*)\/?(.*)?/, '$1/blob/develop/$2');
-		let githubUrl = `github: https://github.com/enactjs/${packageName}${relativeFile}\n`;
+
+		let githubUrl = `github: https://github.com/enactjs/${packageName}${relativeFile}\r\n`;
 
 		if (base === 'config.json') return;
 
@@ -431,6 +480,8 @@ function copyStaticDocs ({source, outputTo: outputBase, icon}) {
 			shelljs.cp(iconSource, './static/');
 		}
 	});
+
+	console.log("end of copy static docs");
 }
 
 /**
@@ -628,6 +679,7 @@ function init () {
 
 	if (standalone) {
 		const files = getValidFiles([{path}], pattern);
+		console.log("123");
 		getDocumentation(files, strict, true)
 			.then(() => postValidate(strict, true));
 	}
