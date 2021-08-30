@@ -427,16 +427,15 @@ function copyStaticDocs ({source, outputTo: outputBase, icon}) {
 	console.log(`Processing ${source}`);	// eslint-disable-line no-console
 
 	files.forEach((file) => {
-		const sourceWin32 = source.replace('/', '\\');
 		let outputPath = outputBase;
-		const relativeFile = pathModule.relative(os.platform() === 'win32' ? sourceWin32 : source, file).replace('\\', '/');
+		const relativeFile = pathModule.relative(source, file);
 
 		const ext = pathModule.extname(relativeFile);
 		const base = pathModule.basename(relativeFile);
 		// Cheating, discard 'raw' and get directory name -- this will work with 'enact/packages'
 		const packageName = source.replace(/raw\/([^/]*)\/?(.*)?/, '$1/blob/develop/$2');
 		let githubUrl = `github: https://github.com/enactjs/${packageName}${relativeFile}\n`;
-
+console.log(githubUrl);
 		if (base === 'config.json') return;
 
 		if (relativeFile.indexOf('docs') !== 0) {
