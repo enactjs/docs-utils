@@ -51,12 +51,11 @@ const getValidFiles = (modules, pattern = '*.js') => {
 
 	modules.forEach(moduleConfig => {
 
-		console.log(moduleConfig.path);
 		let cmd;
 		let pathWin32 = moduleConfig.path.replace("/", "\\" )
 		if(os.platform() === 'win32') {
-			cmd = `dir ${pathWin32}\\${pattern} /S /B | findstr /F:/ @module /v /i /m  /C:"node_modules" /C:"build" /C:"sampler" /C:"samples"  /C:"tests"  /C:"dist"  /C:"coverage"`;
-			console.log(cmd);
+			cmd = `dir ${pathWin32}\\${pattern} /S /B | findstr /m /F:/ @module /v /i /C:"node_modules" /C:"build" /C:"sampler" /C:"samples"  /C:"tests"  /C:"dist"  /C:"coverage"`;
+
 			moduleFiles = shelljs.exec(cmd, {silent: true});
 			Array.prototype.push.apply(files, moduleFiles.stdout.trim().split('\r\n'));
 		} else {
@@ -75,9 +74,6 @@ const getValidFiles = (modules, pattern = '*.js') => {
 			moduleFiles = shelljs.exec(cmd, {silent: true});
 			Array.prototype.push.apply(files, moduleFiles.stdout.trim().split('\n'));
 		}
-console.log(files);
-
-
 	});
 
 	return files;
@@ -94,11 +90,15 @@ console.log(files);
  * @returns {Promise[]} - An array of promises that represent the scanning process
  */
 const getDocumentation = (paths, strict, noSave) => {
-	console.log(paths);
 	const docOutputPath = pathModule.join('src', 'pages', 'docs', 'modules');
 	// TODO: Add @module to all files and scan files and combine json
 	const validPaths = paths.reduce((prev, path) => {
-		return prev.add(path.split('/').slice(0, -1).join('/'));
+		if (os.platform() === 'win32') {
+			return prev.add(path.split('\\').slice(0, -1).join('\\'));
+		} else {
+			return prev.add(path.split('/').slice(0, -1).join('/'));
+		}
+
 	}, new Set());
 	const promises = [];
 
@@ -106,21 +106,30 @@ const getDocumentation = (paths, strict, noSave) => {
 		{total: validPaths.size, width: 20, complete: '#', incomplete: ' '});
 
 	validPaths.forEach(function (path) {
-		//console.log(path);
+
 		// TODO: If we do change it to scan each file rather than directory we need to fix componentDirectory matching
-		let componentDirectory = path.split('packages/')[1] || path.split('raw/')[1] || path.split('/').slice(-2).join('/');
+		let componentDirectory;
+		if (os.platform() === 'win32') {
+			componentDirectory = path.split('packages\\')[1] || path.split('raw\\')[1] || path.split('\\').slice(-2).join('\\');
+		} else {
+			componentDirectory = path.split('packages/')[1] || path.split('raw/')[1] || path.split('/').slice(-2).join('/');
+		}
+
 		const basePath = pathModule.join(process.cwd(), docOutputPath);
 		// Check for 'spotlight/src' and anything similar
-		//console.log(componentDirectory);
-		let componentDirParts = componentDirectory && componentDirectory.split('/');
+
+		let componentDirParts = componentDirectory && componentDirectory.split(os.platform() === 'win32' ? '\\' : '/');
 		if ((Array.isArray(componentDirParts) && componentDirParts.length > 1) && (componentDirParts.pop() === 'src')) {
-			componentDirectory = componentDirParts.join('/');
+			componentDirectory = componentDirParts.join(os.platform() === 'win32' ? '\\' : '/');
 		}
 
 		promises.push(documentation.build(path, {shallow: true}).then(output => {
-			console.log(componentDirectory);
 			bar.tick({file: componentDirectory});
 			if (output.length) {
+
+				if(os.platform() === 'win32') {
+					output[0].path[0].name = output[0].path[0].name.replace("/", "\\");
+				}
 
 				validate(output, componentDirectory, strict);
 
@@ -152,7 +161,6 @@ const getDocumentation = (paths, strict, noSave) => {
 			bar.tick({file: componentDirectory});
 		}));
 	});
-	console.log("6");
 	return Promise.all(promises);
 };
 
@@ -391,7 +399,7 @@ function getDocsConfig (path = process.cwd()) {
  */
 function copyStaticDocs ({source, outputTo: outputBase, icon}) {
 	let findCmd, docFiles, files = [];
-console.log(source);
+
 	if (os.platform() === 'win32') {
 		const sourceWin32 = source.replace("/", "\\")
 
@@ -480,8 +488,6 @@ console.log(source);
 			shelljs.cp(iconSource, './static/');
 		}
 	});
-
-	console.log("end of copy static docs");
 }
 
 /**
@@ -679,7 +685,6 @@ function init () {
 
 	if (standalone) {
 		const files = getValidFiles([{path}], pattern);
-		console.log("123");
 		getDocumentation(files, strict, true)
 			.then(() => postValidate(strict, true));
 	}
