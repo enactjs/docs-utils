@@ -429,7 +429,6 @@ function copyStaticDocs ({source, outputTo: outputBase, icon}) {
 	files.forEach((file) => {
 		let outputPath = outputBase;
 		const relativeFile = pathModule.relative(source, file);
-
 		const ext = pathModule.extname(relativeFile);
 		const base = pathModule.basename(relativeFile);
 		// Cheating, discard 'raw' and get directory name -- this will work with 'enact/packages'
