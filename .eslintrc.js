@@ -11,7 +11,7 @@ module.exports = {
 		'mocha': true
 	},
 	parserOptions: {
-		'ecmaVersion': 2018,
+		'ecmaVersion': 2018
 	},
 	root: true,
 	extends: ['eslint:recommended'],
@@ -58,7 +58,7 @@ module.exports = {
 		'no-shadow': [2, {'builtinGlobals': true, 'hoist': 'all', 'allow': ['context']}],
 		'no-use-before-define': [2, {'functions': false}],
 		'array-bracket-spacing': 1,
-		'brace-style': [1, '1tbs', {'allowSingleLine': true }],
+		'brace-style': [1, '1tbs', {'allowSingleLine': true}],
 		'comma-spacing': 1,
 		'comma-style': 1,
 		'computed-property-spacing': 1,
