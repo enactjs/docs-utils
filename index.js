@@ -47,13 +47,11 @@ const allowedErrorTags = ['@curried', '@hoc', '@hocconfig', '@omit', '@required'
  */
 const getValidFiles = (modules, pattern = '*.js') => {
 	const files = [];
-	let moduleFiles;
+	let cmd, moduleFiles;
 
 	modules.forEach(moduleConfig => {
-
-		let cmd;
-		let pathWin32 = moduleConfig.path.replace('/', '\\' );
 		if (os.platform() === 'win32') {
+			let pathWin32 = moduleConfig.path.replace('/', '\\' );
 			cmd = `dir ${pathWin32}\\${pattern} /S /B | findstr /m /F:/ @module /v /i /C:"node_modules" /C:"build" /C:"sampler" /C:"samples"  /C:"tests"  /C:"dist"  /C:"coverage"`;
 
 			moduleFiles = shelljs.exec(cmd, {silent: true});
@@ -106,7 +104,6 @@ const getDocumentation = (paths, strict, noSave) => {
 		{total: validPaths.size, width: 20, complete: '#', incomplete: ' '});
 
 	validPaths.forEach(function (path) {
-
 		// TODO: If we do change it to scan each file rather than directory we need to fix componentDirectory matching
 		let componentDirectory;
 		if (os.platform() === 'win32') {
@@ -117,7 +114,6 @@ const getDocumentation = (paths, strict, noSave) => {
 
 		const basePath = pathModule.join(process.cwd(), docOutputPath);
 		// Check for 'spotlight/src' and anything similar
-
 		let componentDirParts = componentDirectory && componentDirectory.split(os.platform() === 'win32' ? '\\' : '/');
 		if ((Array.isArray(componentDirParts) && componentDirParts.length > 1) && (componentDirParts.pop() === 'src')) {
 			componentDirectory = componentDirParts.join(os.platform() === 'win32' ? '\\' : '/');
@@ -126,7 +122,6 @@ const getDocumentation = (paths, strict, noSave) => {
 		promises.push(documentation.build(path, {shallow: true}).then(output => {
 			bar.tick({file: componentDirectory});
 			if (output.length) {
-
 				if (os.platform() === 'win32') {
 					output[0].path[0].name = output[0].path[0].name.replace('/', '\\');
 				}
@@ -264,7 +259,6 @@ function validate (docs, componentDirectory, strict) {
 	allModules.push(docs[0].name);
 	const library = docs[0].name.split('/')[0];
 	allLibraries[library] = true;
-
 }
 
 /**
@@ -319,7 +313,6 @@ function postValidate (strict, ignoreExternal) {
 }
 
 function parseTableOfContents (frontMatter, body) {
-
 	let maxdepth = 2;
 	const tocConfig = frontMatter.match(/^toc: ?(\d+)$/m);
 	if (tocConfig) {
@@ -402,13 +395,9 @@ function copyStaticDocs ({source, outputTo: outputBase, icon}) {
 
 	if (os.platform() === 'win32') {
 		const sourceWin32 = source.replace('/', '\\');
-
-		const findBase1 = 'dir',
-			findBase2 = '\\*docs /S /B /AD';
-
-		const findCmdDir = `${findBase1} ${sourceWin32}${findBase2}`;
-		const docsDirs = shelljs.exec(findCmdDir, {silent: true});
-		const dirs = docsDirs.stdout.trim().split('\r\n');
+		const findCmdDir = `dir ${sourceWin32}\\*docs /S /B /AD`;
+		const docDirs = shelljs.exec(findCmdDir, {silent: true});
+		const dirs = docDirs.stdout.trim().split('\r\n');
 
 		for ( let dir of dirs) {
 			const findCmdFiles = `dir ${dir} /S /B /A-D`;
@@ -431,7 +420,6 @@ function copyStaticDocs ({source, outputTo: outputBase, icon}) {
 	}
 
 	if ((files.length < 1) || !files[0]) {	// Empty search has single empty string in array
-
 		console.error('Unable to find docs in', source);	// eslint-disable-line no-console
 		process.exit(2);
 	}
@@ -440,15 +428,13 @@ function copyStaticDocs ({source, outputTo: outputBase, icon}) {
 
 	files.forEach((file) => {
 		const sourceWin32 = source.replace('/', '\\');
-
 		let outputPath = outputBase;
-		const relativeFile = pathModule.relative(sourceWin32, file).replace('\\', '/');
+		const relativeFile = pathModule.relative(os.platform() === 'win32' ? sourceWin32 : source, file).replace('\\', '/');
 
 		const ext = pathModule.extname(relativeFile);
 		const base = pathModule.basename(relativeFile);
 		// Cheating, discard 'raw' and get directory name -- this will work with 'enact/packages'
 		const packageName = source.replace(/raw\/([^/]*)\/?(.*)?/, '$1/blob/develop/$2');
-
 		let githubUrl = `github: https://github.com/enactjs/${packageName}${relativeFile}\r\n`;
 
 		if (base === 'config.json') return;
