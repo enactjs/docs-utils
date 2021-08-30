@@ -52,8 +52,8 @@ const getValidFiles = (modules, pattern = '*.js') => {
 	modules.forEach(moduleConfig => {
 
 		let cmd;
-		let pathWin32 = moduleConfig.path.replace("/", "\\" )
-		if(os.platform() === 'win32') {
+		let pathWin32 = moduleConfig.path.replace('/', '\\' );
+		if (os.platform() === 'win32') {
 			cmd = `dir ${pathWin32}\\${pattern} /S /B | findstr /m /F:/ @module /v /i /C:"node_modules" /C:"build" /C:"sampler" /C:"samples"  /C:"tests"  /C:"dist"  /C:"coverage"`;
 
 			moduleFiles = shelljs.exec(cmd, {silent: true});
@@ -127,8 +127,8 @@ const getDocumentation = (paths, strict, noSave) => {
 			bar.tick({file: componentDirectory});
 			if (output.length) {
 
-				if(os.platform() === 'win32') {
-					output[0].path[0].name = output[0].path[0].name.replace("/", "\\");
+				if (os.platform() === 'win32') {
+					output[0].path[0].name = output[0].path[0].name.replace('/', '\\');
 				}
 
 				validate(output, componentDirectory, strict);
@@ -401,7 +401,7 @@ function copyStaticDocs ({source, outputTo: outputBase, icon}) {
 	let findCmd, docFiles, files = [];
 
 	if (os.platform() === 'win32') {
-		const sourceWin32 = source.replace("/", "\\")
+		const sourceWin32 = source.replace('/', '\\');
 
 		const findBase1 = 'dir',
 			findBase2 = '\\*docs /S /B /AD';
@@ -413,9 +413,9 @@ function copyStaticDocs ({source, outputTo: outputBase, icon}) {
 		for ( let dir of dirs) {
 			const findCmdFiles = `dir ${dir} /S /B /A-D`;
 			const docFilesTemp = shelljs.exec(findCmdFiles, {silent: true});
-			const filesTemp = docFilesTemp.stdout.trim().split('\r\n')
+			const filesTemp = docFilesTemp.stdout.trim().split('\r\n');
 
-			for(const file of filesTemp) {
+			for (const file of filesTemp) {
 				files.push(file);
 			}
 		}
@@ -439,10 +439,10 @@ function copyStaticDocs ({source, outputTo: outputBase, icon}) {
 	console.log(`Processing ${source}`);	// eslint-disable-line no-console
 
 	files.forEach((file) => {
-		const sourceWin32 = source.replace("/", "\\")
+		const sourceWin32 = source.replace('/', '\\');
 
 		let outputPath = outputBase;
-		const relativeFile = pathModule.relative(sourceWin32, file).replace("\\", "/");
+		const relativeFile = pathModule.relative(sourceWin32, file).replace('\\', '/');
 
 		const ext = pathModule.extname(relativeFile);
 		const base = pathModule.basename(relativeFile);
