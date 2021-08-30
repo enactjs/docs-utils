@@ -435,7 +435,7 @@ function copyStaticDocs ({source, outputTo: outputBase, icon}) {
 		// Cheating, discard 'raw' and get directory name -- this will work with 'enact/packages'
 		const packageName = source.replace(/raw\/([^/]*)\/?(.*)?/, '$1/blob/develop/$2');
 		let githubUrl = `github: https://github.com/enactjs/${packageName}${relativeFile}\n`;
-console.log(githubUrl);
+
 		if (base === 'config.json') return;
 
 		if (relativeFile.indexOf('docs') !== 0) {
