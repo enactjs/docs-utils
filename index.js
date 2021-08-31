@@ -399,7 +399,7 @@ function copyStaticDocs ({source, outputTo: outputBase, icon}) {
 		const docDirs = shelljs.exec(findCmdDir, {silent: true});
 		const dirs = docDirs.stdout.trim().split('\r\n');
 
-		for ( let dir of dirs) {
+		for (let dir of dirs) {
 			const findCmdFiles = `dir ${dir} /S /B /A-D`;
 			const docFilesTemp = shelljs.exec(findCmdFiles, {silent: true});
 			const filesTemp = docFilesTemp.stdout.trim().split('\r\n');
