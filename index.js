@@ -392,7 +392,7 @@ function getDocsConfig (path = process.cwd()) {
  * @param {string} config.outputTo - Path to copy static docs
  */
 function copyStaticDocs ({source, outputTo: outputBase, icon}) {
-	let findCmd, docFiles, files = [];
+	let files = [];
 
 	if (os.platform() === 'win32') {
 		const sourceWin32 = source.replace('/', '\\');
@@ -415,8 +415,8 @@ function copyStaticDocs ({source, outputTo: outputBase, icon}) {
 			findBase = 'find -L' + (os.platform() === 'darwin' ? ' -E' : ''),
 			findTarget = '-type f -path "*/docs/*"';
 
-		findCmd = `${findBase} ${source} ${findIgnores} -o ${findTarget} -print`;
-		docFiles = shelljs.exec(findCmd, {silent: true});
+		const findCmd = `${findBase} ${source} ${findIgnores} -o ${findTarget} -print`;
+		const docFiles = shelljs.exec(findCmd, {silent: true});
 		files = docFiles.stdout.trim().split('\n');
 	}
 
