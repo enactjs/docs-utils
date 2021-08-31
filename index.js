@@ -374,6 +374,7 @@ function getDocsConfig (path = process.cwd()) {
 			config = jsonfile.readFileSync(configFilename);
 		} catch (_) {
 			defaultConfig.hasConfig = false;
+			// eslint-disable-next-line no-console
 			console.warn(`Error loading ${configFilename}, using default config`);
 			process.exitCode = 1;
 		}
@@ -529,6 +530,7 @@ function extractLibraryDescription ({path, hasPackageDir, description, ...rest},
 			};
 		} catch (_) {
 			if (strict) {
+				// eslint-disable-next-line no-console
 				console.warn(`Unable to load package.json in ${libPath}!`);
 				process.exitCode = 1;
 			}
@@ -548,7 +550,9 @@ function extractLibraryDescription ({path, hasPackageDir, description, ...rest},
 				const readmeDescription = contents.split('\n')[2].split('> ')[1];
 
 				output[name].description = readmeDescription;
-			} catch (_) {}
+			} catch (_) {
+				// disable es-lint warning
+			}
 
 			// Unable to load description, use package.json
 			if (!output[name].description) {
