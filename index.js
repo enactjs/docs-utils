@@ -489,6 +489,10 @@ function copyStaticDocs ({source, outputTo: outputBase, icon}) {
 function extractLibraryDescription ({path, hasPackageDir, description, ...rest}, strict) {
 	const output = {};
 	let libraryPaths;
+	
+	if(os.platform() === 'win32') {
+		path = path.replace("/", '\\');
+	}
 
 	if (hasPackageDir) {
 		const packageDir = pathModule.join(path, 'packages'),
