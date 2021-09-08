@@ -2,7 +2,7 @@
 
 > Utilities for parsing and validating JSDoc
 
-**Note:** Requires Node 10.10+.  Not designed to run on Windows.
+**Note:** Requires Node 10.10+.
 
 ## Standalone Usage
 

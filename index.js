@@ -47,9 +47,17 @@ const allowedErrorTags = ['@curried', '@hoc', '@hocconfig', '@omit', '@required'
  */
 const getValidFiles = (modules, pattern = '*.js') => {
 	const files = [];
+	let cmd, moduleFiles;
 
 	modules.forEach(moduleConfig => {
-		const grepCmd = `
+		if (os.platform() === 'win32') {
+			let pathWin32 = moduleConfig.path.replace('/', '\\' );
+			cmd = `dir ${pathWin32}\\${pattern} /S /B | findstr /m /F:/ @module /v /i /C:"node_modules" /C:"build" /C:"sampler" /C:"samples"  /C:"tests"  /C:"dist"  /C:"coverage"`;
+
+			moduleFiles = shelljs.exec(cmd, {silent: true});
+			Array.prototype.push.apply(files, moduleFiles.stdout.trim().split('\r\n'));
+		} else {
+			cmd = `
 			grep -r -l "@module" \
 				${moduleConfig.path} \
 				--exclude-dir=build \
@@ -61,8 +69,9 @@ const getValidFiles = (modules, pattern = '*.js') => {
 				--exclude-dir=coverage \
 				--include=${pattern}
 		`;
-		const moduleFiles = shelljs.exec(grepCmd, {silent: true});
-		Array.prototype.push.apply(files, moduleFiles.stdout.trim().split('\n'));
+			moduleFiles = shelljs.exec(cmd, {silent: true});
+			Array.prototype.push.apply(files, moduleFiles.stdout.trim().split('\n'));
+		}
 	});
 
 	return files;
@@ -82,7 +91,12 @@ const getDocumentation = (paths, strict, noSave) => {
 	const docOutputPath = pathModule.join('src', 'pages', 'docs', 'modules');
 	// TODO: Add @module to all files and scan files and combine json
 	const validPaths = paths.reduce((prev, path) => {
-		return prev.add(path.split('/').slice(0, -1).join('/'));
+		if (os.platform() === 'win32') {
+			return prev.add(path.split('\\').slice(0, -1).join('\\'));
+		} else {
+			return prev.add(path.split('/').slice(0, -1).join('/'));
+		}
+
 	}, new Set());
 	const promises = [];
 
@@ -91,17 +105,26 @@ const getDocumentation = (paths, strict, noSave) => {
 
 	validPaths.forEach(function (path) {
 		// TODO: If we do change it to scan each file rather than directory we need to fix componentDirectory matching
-		let componentDirectory = path.split('packages/')[1] || path.split('raw/')[1] || path.split('/').slice(-2).join('/');
+		let componentDirectory;
+		if (os.platform() === 'win32') {
+			componentDirectory = path.split('packages\\')[1] || path.split('raw\\')[1] || path.split('\\').slice(-2).join('\\');
+		} else {
+			componentDirectory = path.split('packages/')[1] || path.split('raw/')[1] || path.split('/').slice(-2).join('/');
+		}
+
 		const basePath = pathModule.join(process.cwd(), docOutputPath);
 		// Check for 'spotlight/src' and anything similar
-		let componentDirParts = componentDirectory && componentDirectory.split('/');
+		let componentDirParts = componentDirectory && componentDirectory.split(os.platform() === 'win32' ? '\\' : '/');
 		if ((Array.isArray(componentDirParts) && componentDirParts.length > 1) && (componentDirParts.pop() === 'src')) {
-			componentDirectory = componentDirParts.join('/');
+			componentDirectory = componentDirParts.join(os.platform() === 'win32' ? '\\' : '/');
 		}
 
 		promises.push(documentation.build(path, {shallow: true}).then(output => {
 			bar.tick({file: componentDirectory});
 			if (output.length) {
+				if (os.platform() === 'win32') {
+					output[0].path[0].name = output[0].path[0].name.replace('/', '\\');
+				}
 
 				validate(output, componentDirectory, strict);
 
@@ -351,6 +374,7 @@ function getDocsConfig (path = process.cwd()) {
 			config = jsonfile.readFileSync(configFilename);
 		} catch (_) {
 			defaultConfig.hasConfig = false;
+			// eslint-disable-next-line no-console
 			console.warn(`Error loading ${configFilename}, using default config`);
 			process.exitCode = 1;
 		}
@@ -368,15 +392,33 @@ function getDocsConfig (path = process.cwd()) {
  * @param {string} config.outputTo - Path to copy static docs
  */
 function copyStaticDocs ({source, outputTo: outputBase, icon}) {
-	const findIgnores = '-type d -regex \'.*/(node_modules|build|sampler|samples|tests|coverage)\' -prune',
-		// MacOS find command uses non-standard -E for regex type
-		findBase = 'find -L' + (os.platform() === 'darwin' ? ' -E' : ''),
-		findTarget = '-type f -path "*/docs/*"';
+	let files = [];
 
-	const findCmd = `${findBase} ${source} ${findIgnores} -o ${findTarget} -print`;
+	if (os.platform() === 'win32') {
+		const sourceWin32 = source.replace('/', '\\');
+		const findCmdDir = `dir ${sourceWin32}\\*docs /S /B /AD`;
+		const docDirs = shelljs.exec(findCmdDir, {silent: true});
+		const dirs = docDirs.stdout.trim().split('\r\n');
 
-	const docFiles = shelljs.exec(findCmd, {silent: true});
-	const files = docFiles.stdout.trim().split('\n');
+		for (let dir of dirs) {
+			const findCmdFiles = `dir ${dir} /S /B /A-D`;
+			const docFilesTemp = shelljs.exec(findCmdFiles, {silent: true});
+			const filesTemp = docFilesTemp.stdout.trim().split('\r\n');
+
+			for (const file of filesTemp) {
+				files.push(file);
+			}
+		}
+	} else {
+		const findIgnores = '-type d -regex \'.*/(node_modules|build|sampler|samples|tests|coverage)\' -prune',
+			// MacOS find command uses non-standard -E for regex type
+			findBase = 'find -L' + (os.platform() === 'darwin' ? ' -E' : ''),
+			findTarget = '-type f -path "*/docs/*"';
+
+		const findCmd = `${findBase} ${source} ${findIgnores} -o ${findTarget} -print`;
+		const docFiles = shelljs.exec(findCmd, {silent: true});
+		files = docFiles.stdout.trim().split('\n');
+	}
 
 	if ((files.length < 1) || !files[0]) {	// Empty search has single empty string in array
 		console.error('Unable to find docs in', source);	// eslint-disable-line no-console
@@ -448,6 +490,10 @@ function extractLibraryDescription ({path, hasPackageDir, description, ...rest},
 	const output = {};
 	let libraryPaths;
 
+	if (os.platform() === 'win32') {
+		path = path.replace('/', '\\');
+	}
+
 	if (hasPackageDir) {
 		const packageDir = pathModule.join(path, 'packages'),
 			filter = (entry => entry.isDirectory() &&
@@ -488,6 +534,7 @@ function extractLibraryDescription ({path, hasPackageDir, description, ...rest},
 			};
 		} catch (_) {
 			if (strict) {
+				// eslint-disable-next-line no-console
 				console.warn(`Unable to load package.json in ${libPath}!`);
 				process.exitCode = 1;
 			}
@@ -507,7 +554,9 @@ function extractLibraryDescription ({path, hasPackageDir, description, ...rest},
 				const readmeDescription = contents.split('\n')[2].split('> ')[1];
 
 				output[name].description = readmeDescription;
-			} catch (_) {}
+			} catch (_) {
+				// disable es-lint warning
+			}
 
 			// Unable to load description, use package.json
 			if (!output[name].description) {
