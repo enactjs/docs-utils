@@ -33,17 +33,17 @@
   },
   "homepage": "https://github.com/enactjs/docs-utils#readme",
   "dependencies": {
-    "chalk": "^3.0.0",
+    "chalk": "^4.0.0",
     "documentation": "^13.2.5",
     "elasticlunr": "^0.9.5",
     "gray-matter": "^4.0.2",
     "jsonata": "^1.7.0",
-    "jsonfile": "^5.0.0",
+    "jsonfile": "^6.0.0",
     "markdown-toc": "^1.2.0",
     "minimist": "^1.2.0",
     "mkdirp": "^1.0.3",
-    "progress": "^1.1.8",
-    "readdirp": "^2.2.1",
+    "progress": "^2.0.0",
+    "readdirp": "^3.6.0",
     "shelljs": "^0.8.3"
   },
   "devDependencies": {
