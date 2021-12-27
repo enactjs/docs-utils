@@ -34,11 +34,11 @@
   "homepage": "https://github.com/enactjs/docs-utils#readme",
   "dependencies": {
     "chalk": "^4.1.2",
-    "documentation": "^12.3.0",
+    "documentation": "^13.2.5",
     "elasticlunr": "^0.9.5",
     "gray-matter": "^4.0.3",
     "jsonata": "^1.8.5",
-    "jsonfile": "^6.1.0",
+    "jsonfile": "^5.0.0",
     "markdown-toc": "^1.2.0",
     "minimist": "^1.2.5",
     "mkdirp": "^1.0.4",
