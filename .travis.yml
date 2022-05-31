@@ -1,12 +1,10 @@
+dist: focal
 language: node_js
 node_js:
-    - 10
+    - node
 sudo: false
-cache:
-  directories:
-    - $(npm config get cache)
 install:
-    - npm config set prefer-offline true
+    - npm config set prefer-offline false
     - npm install
 script:
     - echo -e "\x1b\x5b35;1m*** Linting...\x1b\x5b0m"
