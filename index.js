@@ -37,6 +37,7 @@ const allModules = [];
 const keysToIgnore = ['lineNumber', 'position', 'code', 'loc', 'context', 'path', 'loose', 'checked', 'todos', 'errors'];
 // These are allowed 'errors' in the documentation.  These are our custom tags.
 const allowedErrorTags = ['@curried', '@hoc', '@hocconfig', '@omit', '@required', '@template', '@ui'];
+console.log('testTEST');
 
 /**
  * Scans the specified repos in the `raw` directory for files containing `@module`.
