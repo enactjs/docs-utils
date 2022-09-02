@@ -607,7 +607,7 @@ function generateIndex (docIndexFile) {
 
 	console.log('Generating search index...');	// eslint-disable-line no-console
 
-	readdirp({root: 'src/pages/docs/modules', fileFilter: '*.json'}, (err, res) => {
+	readdirp('src/pages/docs/modules', {fileFilter: '*.json'}, (err, res) => {
 		if (!err) {
 			res.files.forEach(result => {
 				const filename = result.fullPath;
@@ -629,7 +629,7 @@ function generateIndex (docIndexFile) {
 			process.exit(2);
 		}
 
-		readdirp({root: 'src/pages/', fileFilter: '*.md'}, (_err, _res) => {
+		readdirp('src/pages/', {fileFilter: '*.md'}, (_err, _res) => {
 			if (!_err) {
 				_res.files.forEach(result => {
 					const filename = result.fullPath;
