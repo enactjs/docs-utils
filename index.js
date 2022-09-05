@@ -629,12 +629,10 @@ function generateIndex (docIndexFile) {
 			process.exit(2);
 		}
 
-		readdirp('src/pages/', {fileFilter: '*.md', alwaysStat: true}, (_err, _res) => {
+		readdirp('src/pages/', {fileFilter: '*.md', alwaysStat: true}, async (_err, _res) => {
 			if (!_err) {
 				_res.files.forEach(result => {
 					const filename = result.fullPath;
-					console.log(filename);
-					const data = matter.read(filename);
 					const title = data.data.title || pathModule.parse(filename).name;
 					const id = `${title}|${pathModule.relative('src/pages/', pathModule.dirname(filename))}`;
 
@@ -646,7 +644,7 @@ function generateIndex (docIndexFile) {
 					}
 				});
 				makeDataDir();
-				jsonfile.writeFileSync(docIndexFile, index.toJSON());
+				await jsonfile.writeFileSync(docIndexFile, index.toJSON());
 			} else {
 				console.error(chalk.red('Unable to find parsed documentation!'));	// eslint-disable-line no-console
 				process.exit(2);
