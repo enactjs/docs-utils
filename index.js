@@ -629,7 +629,7 @@ function generateIndex (docIndexFile) {
 			process.exit(2);
 		}
 
-		readdirp('src/pages/', {fileFilter: '*.md'}, async (_err, _res) => {
+		readdirp('src/pages/', {fileFilter: '*.md'}, (_err, _res) => {
 			if (!_err) {
 				_res.files.forEach(result => {
 					const filename = result.fullPath;
@@ -645,7 +645,7 @@ function generateIndex (docIndexFile) {
 					}
 				});
 				makeDataDir();
-				await jsonfile.writeFileSync(docIndexFile, index.toJSON());
+				jsonfile.writeFileSync(docIndexFile, index.toJSON());
 			} else {
 				console.error(chalk.red('Unable to find parsed documentation!'));	// eslint-disable-line no-console
 				process.exit(2);
