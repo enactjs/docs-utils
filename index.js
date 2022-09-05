@@ -200,7 +200,7 @@ function validate (docs, componentDirectory, strict) {
 	const findSees = '**[tags[title="see"]] {"tags": [tags[title="see"]], "context": [context]}',
 		validSee = /({@link|http)/,
 		findLinks = "**[type='link'].url[]";
-		// TODO: findLinks with context: http://try.jsonata.org/BJv4E4UgL
+	// TODO: findLinks with context: http://try.jsonata.org/BJv4E4UgL
 
 	if (docs.length > 1) {
 		const doclets = docs.map(docNameAndPosition).join('\n');
@@ -570,7 +570,7 @@ function extractLibraryDescription ({path, hasPackageDir, description, ...rest},
 
 /**
  * Generates an elasticlunr index from markdown files in `src/pages` and json files in
- 	* `src/pages/docs/modules`.
+ * `src/pages/docs/modules`.
  *
  * @param {string} outputFilename - Filename for the generated index file
  */
@@ -607,7 +607,7 @@ function generateIndex (docIndexFile) {
 
 	console.log('Generating search index...');	// eslint-disable-line no-console
 
-	readdirp('src/pages/docs/modules', {fileFilter: '*.json', alwaysStat: true}, (err, res) => {
+	readdirp('src/pages/docs/modules', {fileFilter: '*.json'}, (err, res) => {
 		if (!err) {
 			res.files.forEach(result => {
 				const filename = result.fullPath;
@@ -629,10 +629,11 @@ function generateIndex (docIndexFile) {
 			process.exit(2);
 		}
 
-		readdirp('src/pages/', {fileFilter: '*.md', alwaysStat: true}, async (_err, _res) => {
+		readdirp('src/pages/', {fileFilter: '*.md'}, async (_err, _res) => {
 			if (!_err) {
 				_res.files.forEach(result => {
 					const filename = result.fullPath;
+					const data = matter.read(filename);
 					const title = data.data.title || pathModule.parse(filename).name;
 					const id = `${title}|${pathModule.relative('src/pages/', pathModule.dirname(filename))}`;
 
