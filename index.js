@@ -633,6 +633,7 @@ function generateIndex (docIndexFile) {
 			if (!_err) {
 				_res.files.forEach(result => {
 					const filename = result.fullPath;
+					console.log(filename);
 					const data = matter.read(filename);
 					const title = data.data.title || pathModule.parse(filename).name;
 					const id = `${title}|${pathModule.relative('src/pages/', pathModule.dirname(filename))}`;
@@ -645,7 +646,7 @@ function generateIndex (docIndexFile) {
 					}
 				});
 				makeDataDir();
-				jsonfile.writeFile(docIndexFile, index.toJSON());
+				jsonfile.writeFileSync(docIndexFile, index.toJSON());
 			} else {
 				console.error(chalk.red('Unable to find parsed documentation!'));	// eslint-disable-line no-console
 				process.exit(2);
