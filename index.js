@@ -645,7 +645,7 @@ function generateIndex (docIndexFile) {
 					}
 				});
 				makeDataDir();
-				jsonfile.writeFileSync(docIndexFile, index.toJSON());
+				jsonfile.writeFile(docIndexFile, index.toJSON());
 			} else {
 				console.error(chalk.red('Unable to find parsed documentation!'));	// eslint-disable-line no-console
 				process.exit(2);
