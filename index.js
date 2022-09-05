@@ -51,7 +51,7 @@ const getValidFiles = (modules, pattern = '*.js') => {
 
 	modules.forEach(moduleConfig => {
 		if (os.platform() === 'win32') {
-			let pathWin32 = moduleConfig.path.replace('/', '\\' );
+			let pathWin32 = moduleConfig.path.replace('/', '\\');
 			cmd = `dir ${pathWin32}\\${pattern} /S /B | findstr /m /F:/ @module /v /i /C:"node_modules" /C:"build" /C:"sampler" /C:"samples"  /C:"tests"  /C:"dist"  /C:"coverage"`;
 
 			moduleFiles = shelljs.exec(cmd, {silent: true});
@@ -181,6 +181,7 @@ function warn (msg, strict) {
  */
 function validate (docs, componentDirectory, strict) {
 	let first = true;
+
 	function prettyWarn (msg) {
 		if (first) {	// bump to next line from progress bar
 			console.log('');	// eslint-disable-line no-console
@@ -199,7 +200,7 @@ function validate (docs, componentDirectory, strict) {
 	// Find all @see tags with the context of the owner, return object with arrays of tags/context
 	const findSees = '**[tags[title="see"]] {"tags": [tags[title="see"]], "context": [context]}',
 		validSee = /({@link|http)/,
-		findLinks = "**[type='link'].url[]";
+		findLinks = '**[type=\'link\'].url[]';
 	// TODO: findLinks with context: http://try.jsonata.org/BJv4E4UgL
 
 	if (docs.length > 1) {
@@ -455,7 +456,7 @@ function copyStaticDocs ({source, outputTo: outputBase, icon}) {
 		if (ext === '.md') {
 			let contents = fs.readFileSync(file, 'utf8')
 				.replace(/(---\ntitle:.*)\n/, '$1\n' + githubUrl)
-				.replace(/(\((?!http)[^)]+)(\/index.md)/g, '$1/')		// index files become 'root' for new directory
+				.replace(/(\((?!http)[^)]+)(\/index.md)/g, '$1/')        // index files become 'root' for new directory
 				.replace(/(\((?!http)[^)]+)(.md)/g, '$1/');			// other .md files become new directory under root
 			if (file.indexOf('index.md') === -1) {
 				contents = contents.replace(/\]\(\.\//g, '](../');	// same level .md files are now relative to root
@@ -628,29 +629,29 @@ function generateIndex (docIndexFile) {
 			console.error(chalk.red('Unable to find parsed documentation!'));	// eslint-disable-line no-console
 			process.exit(2);
 		}
+	});
 
-		readdirp('src/pages/', {fileFilter: '*.md', alwaysStat: true}, (_err, _res) => {
-			if (!_err) {
-				_res.files.forEach(result => {
-					const filename = result.fullPath;
-					const data = matter.read(filename);
-					const title = data.data.title || pathModule.parse(filename).name;
-					const id = `${title}|${pathModule.relative('src/pages/', pathModule.dirname(filename))}`;
+	readdirp('src/pages/', {fileFilter: '*.md', alwaysStat: true}, (_err, _res) => {
+		if (!_err) {
+			_res.files.forEach(result => {
+				const filename = result.fullPath;
+				const data = matter.read(filename);
+				const title = data.data.title || pathModule.parse(filename).name;
+				const id = `${title}|${pathModule.relative('src/pages/', pathModule.dirname(filename))}`;
 
-					try {
-						index.addDoc({id, title, description: data.content});
-					} catch (ex) {
-						console.log(chalk.red(`Error parsing ${result.path}`));	// eslint-disable-line no-console
-						console.log(chalk.red(ex));	// eslint-disable-line no-console
-					}
-				});
-				makeDataDir();
-				jsonfile.writeFileSync(docIndexFile, index.toJSON());
-			} else {
-				console.error(chalk.red('Unable to find parsed documentation!'));	// eslint-disable-line no-console
-				process.exit(2);
-			}
-		});
+				try {
+					index.addDoc({id, title, description: data.content});
+				} catch (ex) {
+					console.log(chalk.red(`Error parsing ${result.path}`));	// eslint-disable-line no-console
+					console.log(chalk.red(ex));	// eslint-disable-line no-console
+				}
+			});
+			makeDataDir();
+			jsonfile.writeFileSync(docIndexFile, index.toJSON());
+		} else {
+			console.error(chalk.red('Unable to find parsed documentation!'));	// eslint-disable-line no-console
+			process.exit(2);
+		}
 	});
 }
 
