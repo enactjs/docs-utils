@@ -27,7 +27,6 @@ const shelljs = require('shelljs'),
 
 const dataDir = 'src/data';
 const libraryDescriptionFile = `${dataDir}/libraryDescription.json`;
-const testDir = `${dataDir}/testDir.json`;
 const allRefs = {};
 const allStatics = [];
 const allLinks = {};
@@ -626,28 +625,28 @@ function generateIndex (docIndexFile) {
 		.on('error', (error) => {
 			console.error(chalk.red(error, 'Unable to find parsed documentation!', error));	// eslint-disable-line no-console
 			process.exit(2);
+		});
+
+	readdirp('src/pages/', {fileFilter: '*.md'})
+		.on('data', (entry) => {
+			const filename = entry.fullPath;
+			const data = matter.read(filename);
+			const title = data.data.title || pathModule.parse(filename).name;
+			const id = `${title}|${pathModule.relative('src/pages/', pathModule.dirname(filename))}`;
+
+			try {
+				index.addDoc({id, title, description: data.content});
+			} catch (ex) {
+				console.log(chalk.red(`Error parsing ${entry.path}`));	// eslint-disable-line no-console
+				console.log(chalk.red(ex));	// eslint-disable-line no-console
+			}
+			makeDataDir();
+			jsonfile.writeFileSync(docIndexFile, index.toJSON());
 		})
-
-		readdirp('src/pages/', {fileFilter: '*.md'})
-			.on('data', (entry) => {
-				const filename = entry.fullPath;
-				const data = matter.read(filename);
-				const title = data.data.title || pathModule.parse(filename).name;
-				const id = `${title}|${pathModule.relative('src/pages/', pathModule.dirname(filename))}`;
-
-				try {
-					index.addDoc({id, title, description: data.content});
-				} catch (ex) {
-					console.log(chalk.red(`Error parsing ${entry.path}`));	// eslint-disable-line no-console
-					console.log(chalk.red(ex));	// eslint-disable-line no-console
-				}
-				makeDataDir();
-				jsonfile.writeFileSync(docIndexFile, index.toJSON());
-			})
-			.on('error', (error) => {
-				console.error(chalk.red('Unable to find parsed documentation!', error)); // eslint-disable-line no-console
-				process.exit(2);
-			})
+		.on('error', (error) => {
+			console.error(chalk.red('Unable to find parsed documentation!', error)); // eslint-disable-line no-console
+			process.exit(2);
+		});
 }
 
 function makeDataDir () {
@@ -658,12 +657,6 @@ function saveLibraryDescriptions (descriptions) {
 	makeDataDir();
 	// generate a json file that contains the description to the corresponding libraries
 	jsonfile.writeFileSync(libraryDescriptionFile, descriptions);
-}
-
-function testDirFunc (descriptions) {
-	makeDataDir();
-	// generate a json file that contains the description to the corresponding libraries
-	jsonfile.writeFileSync(testDir, descriptions);
 }
 
 /**
@@ -689,7 +682,6 @@ init();
 module.exports = {
 	getValidFiles,
 	getDocumentation,
-	testDirFunc,
 	postValidate,
 	copyStaticDocs,
 	generateIndex,
