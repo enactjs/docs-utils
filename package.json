@@ -43,7 +43,7 @@
     "minimist": "^1.2.6",
     "mkdirp": "^1.0.4",
     "progress": "^2.0.3",
-    "readdirp": "^2.2.1",
+    "readdirp": "^3.6.0",
     "shelljs": "^0.8.5"
   },
   "devDependencies": {
