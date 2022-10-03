@@ -14,7 +14,6 @@ const shelljs = require('shelljs'),
 	os = require('os'),
 	pathModule = require('path'),
 	ProgressBar = require('progress'),
-	documentation = require('documentation'),
 	elasticlunr = require('elasticlunr'),
 	jsonata = require('jsonata'),
 	readdirp = require('readdirp'),
@@ -24,6 +23,13 @@ const shelljs = require('shelljs'),
 	chalk = require('chalk'),
 	matter = require('gray-matter'),
 	parseArgs = require('minimist');
+const documentation = import('documentation');
+
+let documentationResponse;
+const generateDocumentationResponse = async () => {
+	documentationResponse = await documentation.then(result => result);
+	return documentationResponse.build;
+};
 
 const dataDir = 'src/data';
 const libraryDescriptionFile = `${dataDir}/libraryDescription.json`;
@@ -82,7 +88,7 @@ const getValidFiles = (modules, pattern = '*.js') => {
  * in directories by module. Module name is inferred from filename.
  *
  * @param {string[]} paths - A list of paths to parse. Note that additional files in the specified
- *	directory will be scanned (e.g. `Panels/index.js` will scan all files in `Panels`).
+ *	directory will be scanned (e.g. `Panels/index.cjs` will scan all files in `Panels`).
  * @param {boolean} strict - If `true`, the process exit code will be set if any warnings exist
  * @param {boolean} noSave - If `true`, no files are written to disk
  * @returns {Promise[]} - An array of promises that represent the scanning process
@@ -103,7 +109,8 @@ const getDocumentation = (paths, strict, noSave) => {
 	const bar = new ProgressBar('Parsing: [:bar] (:current/:total) :file',
 		{total: validPaths.size, width: 20, complete: '#', incomplete: ' '});
 
-	validPaths.forEach(function (path) {
+	validPaths.forEach(async function (path) {
+		await generateDocumentationResponse();
 		// TODO: If we do change it to scan each file rather than directory we need to fix componentDirectory matching
 		let componentDirectory;
 		if (os.platform() === 'win32') {
@@ -119,7 +126,7 @@ const getDocumentation = (paths, strict, noSave) => {
 			componentDirectory = componentDirParts.join(os.platform() === 'win32' ? '\\' : '/');
 		}
 
-		promises.push(documentation.build(path, {shallow: true}).then(output => {
+		promises.push(documentationResponse.build(path, {shallow: true}).then(output => {
 			bar.tick({file: componentDirectory});
 			if (output.length) {
 				if (os.platform() === 'win32') {
