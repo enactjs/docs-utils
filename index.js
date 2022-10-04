@@ -14,7 +14,6 @@ const shelljs = require('shelljs'),
 	os = require('os'),
 	pathModule = require('path'),
 	ProgressBar = require('progress'),
-	documentation = require('documentation'),
 	elasticlunr = require('elasticlunr'),
 	jsonata = require('jsonata'),
 	readdirp = require('readdirp'),
@@ -103,7 +102,7 @@ const getDocumentation = (paths, strict, noSave) => {
 	const bar = new ProgressBar('Parsing: [:bar] (:current/:total) :file',
 		{total: validPaths.size, width: 20, complete: '#', incomplete: ' '});
 
-	validPaths.forEach(function (path) {
+	validPaths.forEach(async function (path) {
 		// TODO: If we do change it to scan each file rather than directory we need to fix componentDirectory matching
 		let componentDirectory;
 		if (os.platform() === 'win32') {
@@ -119,6 +118,7 @@ const getDocumentation = (paths, strict, noSave) => {
 			componentDirectory = componentDirParts.join(os.platform() === 'win32' ? '\\' : '/');
 		}
 
+		const documentation = await import('documentation');
 		promises.push(documentation.build(path, {shallow: true}).then(output => {
 			bar.tick({file: componentDirectory});
 			if (output.length) {
