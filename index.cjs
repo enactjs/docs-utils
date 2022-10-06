@@ -143,10 +143,8 @@ const getDocumentation = (paths, strict, noSave) => {
 							v.forEach(err => {
 								const shortMsg = err.message ? err.message.replace('unknown tag ', '') : '';
 								if (!shortMsg) {
-									// eslint-disable-next-line no-console
 									console.log(chalk.red(`\nParse error: ${err} in ${chalk.white(path)}`));
 								} else if (!allowedErrorTags.includes(shortMsg)) {
-									// eslint-disable-next-line no-console
 									console.log(chalk.red(`\nParse error: ${err.message} in ${chalk.white(path)}:${chalk.white(err.commentLineNumber)}`));
 								}
 							});
@@ -159,7 +157,7 @@ const getDocumentation = (paths, strict, noSave) => {
 			}
 		}).catch((err) => {
 			process.exitCode = 2;
-			console.log(chalk.red(`Unable to process ${path}: ${err}`));	// eslint-disable-line no-console
+			console.log(chalk.red(`Unable to process ${path}: ${err}`));
 			bar.tick({file: componentDirectory});
 		}));
 	});
@@ -172,7 +170,7 @@ function docNameAndPosition (doc) {
 }
 
 function warn (msg, strict) {
-	console.log(chalk.red(msg));	// eslint-disable-line no-console
+	console.log(chalk.red(msg));
 	if (strict && !process.exitCode) {
 		process.exitCode = 1;
 	}
@@ -190,7 +188,7 @@ function validate (docs, componentDirectory, strict) {
 	let first = true;
 	function prettyWarn (msg) {
 		if (first) {	// bump to next line from progress bar
-			console.log('');	// eslint-disable-line no-console
+			console.log('');
 			first = false;
 		}
 		warn(msg, strict);
@@ -381,7 +379,6 @@ function getDocsConfig (path = process.cwd()) {
 			config = jsonfile.readFileSync(configFilename);
 		} catch (_) {
 			defaultConfig.hasConfig = false;
-			// eslint-disable-next-line no-console
 			console.warn(`Error loading ${configFilename}, using default config`);
 			process.exitCode = 1;
 		}
@@ -428,11 +425,11 @@ function copyStaticDocs ({source, outputTo: outputBase, icon}) {
 	}
 
 	if ((files.length < 1) || !files[0]) {	// Empty search has single empty string in array
-		console.error('Unable to find docs in', source);	// eslint-disable-line no-console
+		console.error('Unable to find docs in', source);
 		process.exit(2);
 	}
 
-	console.log(`Processing ${source}`);	// eslint-disable-line no-console
+	console.log(`Processing ${source}`);
 
 	files.forEach((file) => {
 		let outputPath = outputBase;
@@ -541,7 +538,6 @@ function extractLibraryDescription ({path, hasPackageDir, description, ...rest},
 			};
 		} catch (_) {
 			if (strict) {
-				// eslint-disable-next-line no-console
 				console.warn(`Unable to load package.json in ${libPath}!`);
 				process.exitCode = 1;
 			}
@@ -612,53 +608,48 @@ function generateIndex (docIndexFile) {
 		this.saveDocument(false);
 	});
 
-	console.log('Generating search index...');	// eslint-disable-line no-console
+	console.log('Generating search index...');
 
-	readdirp({root: 'src/pages/docs/modules', fileFilter: '*.json'}, (err, res) => {
-		if (!err) {
-			res.files.forEach(result => {
-				const filename = result.fullPath;
-				const json = jsonfile.readFileSync(filename);
-				try {
-					const doc = jsonata(expression).evaluate(json);
-					// Because we don't save the source data with the index, we only have access to
-					// the ref (id). Include both the human-readable title and the path to the doc
-					// in the ref so we can parse it later for display.
-					doc.id = `${doc.title}|docs/modules/${doc.title}`;
-					index.addDoc(doc);
-				} catch (ex) {
-					console.log(chalk.red(`Error parsing ${result.path}`));	// eslint-disable-line no-console
-					console.log(chalk.red(ex));	// eslint-disable-line no-console
-				}
-			});
-		} else {
-			console.error(chalk.red('Unable to find parsed documentation!'));	// eslint-disable-line no-console
-			process.exit(2);
-		}
-
-		readdirp({root: 'src/pages/', fileFilter: '*.md'}, (_err, _res) => {
-			if (!_err) {
-				_res.files.forEach(result => {
-					const filename = result.fullPath;
-					const data = matter.read(filename);
-					const title = data.data.title || pathModule.parse(filename).name;
-					const id = `${title}|${pathModule.relative('src/pages/', pathModule.dirname(filename))}`;
-
-					try {
-						index.addDoc({id, title, description: data.content});
-					} catch (ex) {
-						console.log(chalk.red(`Error parsing ${result.path}`));	// eslint-disable-line no-console
-						console.log(chalk.red(ex));	// eslint-disable-line no-console
-					}
-				});
-				makeDataDir();
-				jsonfile.writeFileSync(docIndexFile, index.toJSON());
-			} else {
-				console.error(chalk.red('Unable to find parsed documentation!'));	// eslint-disable-line no-console
-				process.exit(2);
+	readdirp('src/pages/docs/modules', {fileFilter: '*.json'})
+		.on('data', (entry) => {
+			const filename = entry.fullPath;
+			const json = jsonfile.readFileSync(filename);
+			try {
+				const doc = jsonata(expression).evaluate(json);
+				// Because we don't save the source data with the index, we only have access to
+				// the ref (id). Include both the human-readable title and the path to the doc
+				// in the ref so we can parse it later for display.
+				doc.id = `${doc.title}|docs/modules/${doc.title}`;
+			} catch (ex) {
+				console.log(chalk.red(`Error parsing ${entry.path}`));
+				console.log(chalk.red(ex));
 			}
+		})
+		.on('error', (error) => {
+			console.error(chalk.red(error, 'Unable to find parsed documentation!', error));
+			process.exit(2);
 		});
-	});
+
+	readdirp('src/pages/', {fileFilter: '*.md'})
+		.on('data', (entry) => {
+			const filename = entry.fullPath;
+			const data = matter.read(filename);
+			const title = data.data.title || pathModule.parse(filename).name;
+			const id = `${title}|${pathModule.relative('src/pages/', pathModule.dirname(filename))}`;
+
+			try {
+				index.addDoc({id, title, description: data.content});
+			} catch (ex) {
+				console.log(chalk.red(`Error parsing ${entry.path}`));
+				console.log(chalk.red(ex));
+			}
+			makeDataDir();
+			jsonfile.writeFileSync(docIndexFile, index.toJSON());
+		})
+		.on('error', (error) => {
+			console.error(chalk.red('Unable to find parsed documentation!', error));
+			process.exit(2);
+		});
 }
 
 function makeDataDir () {
