@@ -136,10 +136,8 @@ const getDocumentation = (paths, strict, noSave) => {
 							v.forEach(err => {
 								const shortMsg = err.message ? err.message.replace('unknown tag ', '') : '';
 								if (!shortMsg) {
-									// eslint-disable-next-line no-console
 									console.log(chalk.red(`\nParse error: ${err} in ${chalk.white(path)}`));
 								} else if (!allowedErrorTags.includes(shortMsg)) {
-									// eslint-disable-next-line no-console
 									console.log(chalk.red(`\nParse error: ${err.message} in ${chalk.white(path)}:${chalk.white(err.commentLineNumber)}`));
 								}
 							});
@@ -152,7 +150,7 @@ const getDocumentation = (paths, strict, noSave) => {
 			}
 		}).catch((err) => {
 			process.exitCode = 2;
-			console.log(chalk.red(`Unable to process ${path}: ${err}`));	// eslint-disable-line no-console
+			console.log(chalk.red(`Unable to process ${path}: ${err}`));
 			bar.tick({file: componentDirectory});
 		}));
 	});
@@ -165,7 +163,7 @@ function docNameAndPosition (doc) {
 }
 
 function warn (msg, strict) {
-	console.log(chalk.red(msg));	// eslint-disable-line no-console
+	console.log(chalk.red(msg));
 	if (strict && !process.exitCode) {
 		process.exitCode = 1;
 	}
@@ -183,7 +181,7 @@ function validate (docs, componentDirectory, strict) {
 	let first = true;
 	function prettyWarn (msg) {
 		if (first) {	// bump to next line from progress bar
-			console.log('');	// eslint-disable-line no-console
+			console.log('');
 			first = false;
 		}
 		warn(msg, strict);
@@ -374,7 +372,6 @@ function getDocsConfig (path = process.cwd()) {
 			config = jsonfile.readFileSync(configFilename);
 		} catch (_) {
 			defaultConfig.hasConfig = false;
-			// eslint-disable-next-line no-console
 			console.warn(`Error loading ${configFilename}, using default config`);
 			process.exitCode = 1;
 		}
@@ -421,11 +418,11 @@ function copyStaticDocs ({source, outputTo: outputBase, icon}) {
 	}
 
 	if ((files.length < 1) || !files[0]) {	// Empty search has single empty string in array
-		console.error('Unable to find docs in', source);	// eslint-disable-line no-console
+		console.error('Unable to find docs in', source);
 		process.exit(2);
 	}
 
-	console.log(`Processing ${source}`);	// eslint-disable-line no-console
+	console.log(`Processing ${source}`);
 
 	files.forEach((file) => {
 		let outputPath = outputBase;
@@ -534,7 +531,6 @@ function extractLibraryDescription ({path, hasPackageDir, description, ...rest},
 			};
 		} catch (_) {
 			if (strict) {
-				// eslint-disable-next-line no-console
 				console.warn(`Unable to load package.json in ${libPath}!`);
 				process.exitCode = 1;
 			}
@@ -605,7 +601,7 @@ function generateIndex (docIndexFile) {
 		this.saveDocument(false);
 	});
 
-	console.log('Generating search index...');	// eslint-disable-line no-console
+	console.log('Generating search index...');
 
 	readdirp('src/pages/docs/modules', {fileFilter: '*.json'})
 		.on('data', (entry) => {
@@ -618,12 +614,12 @@ function generateIndex (docIndexFile) {
 				// in the ref so we can parse it later for display.
 				doc.id = `${doc.title}|docs/modules/${doc.title}`;
 			} catch (ex) {
-				console.log(chalk.red(`Error parsing ${entry.path}`));	// eslint-disable-line no-console
-				console.log(chalk.red(ex));	// eslint-disable-line no-console
+				console.log(chalk.red(`Error parsing ${entry.path}`));
+				console.log(chalk.red(ex));
 			}
 		})
 		.on('error', (error) => {
-			console.error(chalk.red(error, 'Unable to find parsed documentation!', error));	// eslint-disable-line no-console
+			console.error(chalk.red(error, 'Unable to find parsed documentation!', error));
 			process.exit(2);
 		});
 
@@ -637,14 +633,14 @@ function generateIndex (docIndexFile) {
 			try {
 				index.addDoc({id, title, description: data.content});
 			} catch (ex) {
-				console.log(chalk.red(`Error parsing ${entry.path}`));	// eslint-disable-line no-console
-				console.log(chalk.red(ex));	// eslint-disable-line no-console
+				console.log(chalk.red(`Error parsing ${entry.path}`));
+				console.log(chalk.red(ex));
 			}
 			makeDataDir();
 			jsonfile.writeFileSync(docIndexFile, index.toJSON());
 		})
 		.on('error', (error) => {
-			console.error(chalk.red('Unable to find parsed documentation!', error)); // eslint-disable-line no-console
+			console.error(chalk.red('Unable to find parsed documentation!', error));
 			process.exit(2);
 		});
 }
