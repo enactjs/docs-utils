@@ -88,7 +88,7 @@ const getValidFiles = (modules, pattern = '*.js') => {
  * in directories by module. Module name is inferred from filename.
  *
  * @param {string[]} paths - A list of paths to parse. Note that additional files in the specified
- *	directory will be scanned (e.g. `Panels/index.cjs` will scan all files in `Panels`).
+ *	directory will be scanned (e.g. `Panels/index.js` will scan all files in `Panels`).
  * @param {boolean} strict - If `true`, the process exit code will be set if any warnings exist
  * @param {boolean} noSave - If `true`, no files are written to disk
  * @returns {Promise[]} - An array of promises that represent the scanning process
