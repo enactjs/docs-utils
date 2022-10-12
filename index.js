@@ -9,21 +9,21 @@
 // TODO: Allow for configuring output and input dirs better
 // TODO: Consider returning useful values from functions instead of just outputting/saving/etc.
 
-const shelljs = require('shelljs'),
-	fs = require('fs'),
-	os = require('os'),
-	pathModule = require('path'),
-	ProgressBar = require('progress'),
-	elasticlunr = require('elasticlunr'),
-	jsonata = require('jsonata'),
-	readdirp = require('readdirp'),
-	mkdirp = require('mkdirp'),
-	toc = require('markdown-toc'),
-	jsonfile = require('jsonfile'),
-	chalk = require('chalk'),
-	matter = require('gray-matter'),
-	parseArgs = require('minimist');
-const documentation = import('documentation');
+import shelljs from 'shelljs';
+import fs from 'fs';
+import os from 'os';
+import pathModule from 'path';
+import ProgressBar from 'progress';
+import elasticlunr from 'elasticlunr';
+import jsonata from 'jsonnata';
+import readdirp from 'readdirp';
+import mkdirp from 'mkdirp';
+import toc from 'markdown-toc';
+import jsonfile from 'jsonfile';
+import chalk from 'chalk';
+import matter from 'gray-matter';
+import parseArgs from 'minimist';
+import * as documentation from 'documentation';
 
 let documentationResponse;
 const generateDocumentationResponse = async () => {
@@ -682,7 +682,7 @@ function init () {
 
 init();
 
-module.exports = {
+export default {
 	getValidFiles,
 	getDocumentation,
 	postValidate,
