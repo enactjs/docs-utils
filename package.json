@@ -2,7 +2,6 @@
   "name": "@enact/docs-utils",
   "description": "Utilities for parsing and validating JSDoc in Enact projects",
   "version": "0.3.7",
-  "type": "module",
   "engines": {
     "node": ">=10.10.0"
   },
