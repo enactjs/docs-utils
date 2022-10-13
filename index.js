@@ -28,7 +28,6 @@ const documentation = import('documentation');
 let documentationResponse;
 const generateDocumentationResponse = async () => {
 	documentationResponse = await documentation.then(result => result);
-	return documentationResponse.build;
 };
 
 const dataDir = 'src/data';
