@@ -1,11 +1,12 @@
 {
   "name": "@enact/docs-utils",
   "description": "Utilities for parsing and validating JSDoc in Enact projects",
+  "type": "module",
   "version": "0.4.0",
   "engines": {
-    "node": ">=10.10.0"
+    "node": ">=14.13.1 || >=16.0.0"
   },
-  "main": "index.js",
+  "exports": "./index.js",
   "bin": {
     "validate-docs": "index.js"
   },

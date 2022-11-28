@@ -1,7 +1,5 @@
 #!/usr/bin/env node
 
-'use strict';
-
 /* eslint-env node */
 // For `--standalone` the `--path` needs to include the library name or point to `packages`, no
 //	trailing `/`.  Defaults to the current working directory.
@@ -9,21 +7,20 @@
 // TODO: Allow for configuring output and input dirs better
 // TODO: Consider returning useful values from functions instead of just outputting/saving/etc.
 
-const shelljs = require('shelljs'),
-	fs = require('fs'),
-	os = require('os'),
-	pathModule = require('path'),
-	ProgressBar = require('progress'),
-	elasticlunr = require('elasticlunr'),
-	jsonata = require('jsonata'),
-	readdirp = require('readdirp'),
-	mkdirp = require('mkdirp'),
-	toc = require('markdown-toc'),
-	jsonfile = require('jsonfile'),
-	chalk = require('chalk'),
-	matter = require('gray-matter'),
-	parseArgs = require('minimist');
-const documentation = import('documentation');
+import shelljs from 'shelljs';
+import fs from 'fs';
+import os from 'os';
+import pathModule from 'path';
+import ProgressBar from 'progress';
+import elasticlunr from 'elasticlunr';
+import readdirp from 'readdirp';
+import mkdirp from 'mkdirp';
+import toc from 'markdown-toc';
+import jsonfile from 'jsonfile';
+import chalk from 'chalk';
+import matter from 'gray-matter';
+import parseArgs from 'minimist';
+import documentation from 'documentation';
 
 let documentationResponse;
 const generateDocumentationResponse = async () => {
@@ -50,7 +47,7 @@ const allowedErrorTags = ['@curried', '@hoc', '@hocconfig', '@omit', '@required'
  * @param {string} [pattern=*.js] - An optional regex string to be used for filtering files
  * @returns {string[]} - A list of paths of matching files
  */
-const getValidFiles = (modules, pattern = '*.js') => {
+export const getValidFiles = (modules, pattern = '*.js') => {
 	const files = [];
 	let cmd, moduleFiles;
 
@@ -92,7 +89,7 @@ const getValidFiles = (modules, pattern = '*.js') => {
  * @param {boolean} noSave - If `true`, no files are written to disk
  * @returns {Promise[]} - An array of promises that represent the scanning process
  */
-const getDocumentation = (paths, strict, noSave) => {
+export const getDocumentation = (paths, strict, noSave) => {
 	const docOutputPath = pathModule.join('src', 'pages', 'docs', 'modules');
 	// TODO: Add @module to all files and scan files and combine json
 	const validPaths = paths.reduce((prev, path) => {
@@ -273,7 +270,7 @@ function validate (docs, componentDirectory, strict) {
  * @param {boolean} ignoreExternal - If `true`, any modules not scanned will be excluded from
  *	validation (i.e. standalone libraries will not warn for referencing core libraries)
  */
-function postValidate (strict, ignoreExternal) {
+export function postValidate (strict, ignoreExternal) {
 	const moduleRegex = /^((\w+\/\w+)(\.\w+)?)/,
 		exceptions = ['spotlight/Spotlight'];
 
@@ -361,7 +358,7 @@ function prependTableOfContents (contents) {
  * @param {string} [path] - Parent directory of `/docs/config.json`
  * @returns {object} Configuration object
  */
-function getDocsConfig (path = process.cwd()) {
+export function getDocsConfig (path = process.cwd()) {
 	const configFilename = `${path}/docs/config.json`,
 		// don't parse CLI or eslint-config-enact for source
 		parseSource = (path.indexOf('/cli') + path.indexOf('eslint')) < 0,
@@ -394,7 +391,7 @@ function getDocsConfig (path = process.cwd()) {
  * @param {string} config.source - Path to search for docs directory (parent of docs dir)
  * @param {string} config.outputTo - Path to copy static docs
  */
-function copyStaticDocs ({source, outputTo: outputBase, icon}) {
+export function copyStaticDocs ({source, outputTo: outputBase, icon}) {
 	let files = [];
 
 	if (os.platform() === 'win32') {
@@ -489,7 +486,7 @@ function copyStaticDocs ({source, outputTo: outputBase, icon}) {
  * @param {boolean} [strict] - If `true`, set process exit code on warnings
  * @returns {object} - keys = library names  values = object {desc: description, version: version, etc.}
  */
-function extractLibraryDescription ({path, hasPackageDir, description, ...rest}, strict) {
+export function extractLibraryDescription ({path, hasPackageDir, description, ...rest}, strict) {
 	const output = {};
 	let libraryPaths;
 
@@ -576,7 +573,7 @@ function extractLibraryDescription ({path, hasPackageDir, description, ...rest},
  *
  * @param {string} outputFilename - Filename for the generated index file
  */
-function generateIndex (docIndexFile) {
+export function generateIndex (docIndexFile) {
 	// Note: The $map($string) is needed because spotlight has a literal 'false' in a return type!
 	const expression = `{
 	  "title": name,
@@ -655,7 +652,7 @@ function makeDataDir () {
 	mkdirp.sync(dataDir);
 }
 
-function saveLibraryDescriptions (descriptions) {
+export function saveLibraryDescriptions (descriptions) {
 	makeDataDir();
 	// generate a json file that contains the description to the corresponding libraries
 	jsonfile.writeFileSync(libraryDescriptionFile, descriptions);
@@ -680,14 +677,3 @@ function init () {
 }
 
 init();
-
-module.exports = {
-	getValidFiles,
-	getDocumentation,
-	postValidate,
-	copyStaticDocs,
-	generateIndex,
-	getDocsConfig,
-	extractLibraryDescription,
-	saveLibraryDescriptions
-};

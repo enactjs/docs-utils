@@ -2,7 +2,7 @@
 
 > Utilities for parsing and validating JSDoc
 
-**Note:** Requires Node 10.10+.
+**Note:** Requires Node 14.13.1+.
 
 ## Standalone Usage
 
