@@ -11,7 +11,8 @@ module.exports = {
 		'mocha': true
 	},
 	parserOptions: {
-		'ecmaVersion': 'latest'
+		'ecmaVersion': 'latest',
+		'sourceType': 'module'
 	},
 	root: true,
 	extends: ['eslint:recommended'],
