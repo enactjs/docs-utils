@@ -21,6 +21,7 @@ import chalk from 'chalk';
 import matter from 'gray-matter';
 import parseArgs from 'minimist';
 import documentation from 'documentation';
+import jsonata from 'jsonata';
 
 let documentationResponse;
 const generateDocumentationResponse = async () => {
