@@ -11,17 +11,17 @@ import chalk from 'chalk';
 import documentation from 'documentation';
 import elasticlunr from 'elasticlunr';
 import fs from 'fs';
+import matter from 'gray-matter';
 import jsonata from 'jsonata';
 import jsonfile from 'jsonfile';
-import matter from 'gray-matter';
+import toc from 'markdown-toc';
+import parseArgs from 'minimist';
 import mkdirp from 'mkdirp';
 import os from 'os';
-import parseArgs from 'minimist';
 import pathModule from 'path';
 import ProgressBar from 'progress';
 import readdirp from 'readdirp';
 import shelljs from 'shelljs';
-import toc from 'markdown-toc';
 
 let documentationResponse;
 const generateDocumentationResponse = async () => {
