@@ -8,7 +8,6 @@
 // TODO: Consider returning useful values from functions instead of just outputting/saving/etc.
 
 import chalk from 'chalk';
-import documentation from 'documentation';
 import elasticlunr from 'elasticlunr';
 import fs from 'fs';
 import matter from 'gray-matter';
@@ -23,6 +22,7 @@ import ProgressBar from 'progress';
 import readdirp from 'readdirp';
 import shelljs from 'shelljs';
 
+const documentation = import('documentation');
 let documentationResponse;
 const generateDocumentationResponse = async () => {
 	documentationResponse = await documentation.then(result => result);
