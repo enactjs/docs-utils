@@ -7,21 +7,21 @@
 // TODO: Allow for configuring output and input dirs better
 // TODO: Consider returning useful values from functions instead of just outputting/saving/etc.
 
-import shelljs from 'shelljs';
+import chalk from 'chalk';
+import documentation from 'documentation';
+import elasticlunr from 'elasticlunr';
 import fs from 'fs';
+import jsonata from 'jsonata';
+import jsonfile from 'jsonfile';
+import matter from 'gray-matter';
+import mkdirp from 'mkdirp';
 import os from 'os';
+import parseArgs from 'minimist';
 import pathModule from 'path';
 import ProgressBar from 'progress';
-import elasticlunr from 'elasticlunr';
 import readdirp from 'readdirp';
-import mkdirp from 'mkdirp';
+import shelljs from 'shelljs';
 import toc from 'markdown-toc';
-import jsonfile from 'jsonfile';
-import chalk from 'chalk';
-import matter from 'gray-matter';
-import parseArgs from 'minimist';
-import documentation from 'documentation';
-import jsonata from 'jsonata';
 
 let documentationResponse;
 const generateDocumentationResponse = async () => {
