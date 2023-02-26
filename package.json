@@ -3,7 +3,7 @@
   "description": "Utilities for parsing and validating JSDoc in Enact projects",
   "version": "0.4.0",
   "engines": {
-    "node": ">=10.10.0"
+    "node": ">=14"
   },
   "main": "index.js",
   "bin": {
