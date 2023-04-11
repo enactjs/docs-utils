@@ -2,7 +2,7 @@
 
 The following is a curated list of changes in the Enact docs-utils module, newest changes on the top.
 
-## [0.4.2] - 2023-04-11
+## [unreleased]
 
 - Fixed `index.js` to be executable
 
