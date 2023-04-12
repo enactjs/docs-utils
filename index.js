@@ -11,6 +11,7 @@
 
 const shelljs = require('shelljs'),
 	fs = require('fs'),
+
 	os = require('os'),
 	pathModule = require('path'),
 	ProgressBar = require('progress'),
