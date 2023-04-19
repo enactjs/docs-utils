@@ -37,7 +37,7 @@
     "documentation": "^14.0.1",
     "elasticlunr": "^0.9.5",
     "gray-matter": "^4.0.3",
-    "jsonata": "^1.8.6",
+    "jsonata": "^2.0.3",
     "jsonfile": "^6.1.0",
     "markdown-toc": "^1.2.0",
     "minimist": "^1.2.8",
