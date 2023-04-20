@@ -183,7 +183,7 @@ function warn (msg, strict) {
  * @param {boolean} strict - If `true`, the process exit code will be set if any warnings exist
  * @private
  */
-function validate (docs, componentDirectory, strict) {
+async function validate (docs, componentDirectory, strict) {
 	let first = true;
 	function prettyWarn (msg) {
 		if (first) {	// bump to next line from progress bar
@@ -249,7 +249,7 @@ function validate (docs, componentDirectory, strict) {
 		});
 	}
 
-	const links = jsonata(findLinks).evaluate(docs[0]);
+	const links = await jsonata(findLinks).evaluate(docs[0]);
 	if (links) {
 		links.forEach(link => {
 			if (!allLinks[link]) {
