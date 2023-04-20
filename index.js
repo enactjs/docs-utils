@@ -239,7 +239,7 @@ async function validate (docs, componentDirectory, strict) {
 		});
 	}
 
-	const sees = jsonata(findSees).evaluate(docs[0]);
+	const sees = await jsonata(findSees).evaluate(docs[0]);
 	if (sees.tags) {
 		sees.tags.forEach((see, idx) => {
 			if (!validSee.test(see.description)) {
@@ -610,11 +610,11 @@ function generateIndex (docIndexFile) {
 	console.log('Generating search index...');
 
 	readdirp('src/pages/docs/modules', {fileFilter: '*.json'})
-		.on('data', (entry) => {
+		.on('data', async (entry) => {
 			const filename = entry.fullPath;
 			const json = jsonfile.readFileSync(filename);
 			try {
-				const doc = jsonata(expression).evaluate(json);
+				const doc = await jsonata(expression).evaluate(json);
 				// Because we don't save the source data with the index, we only have access to
 				// the ref (id). Include both the human-readable title and the path to the doc
 				// in the ref so we can parse it later for display.
