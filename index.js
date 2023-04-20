@@ -183,7 +183,7 @@ function warn (msg, strict) {
  * @param {boolean} strict - If `true`, the process exit code will be set if any warnings exist
  * @private
  */
-async function validate (docs, componentDirectory, strict) {
+function validate (docs, componentDirectory, strict) {
 	let first = true;
 	function prettyWarn (msg) {
 		if (first) {	// bump to next line from progress bar
@@ -239,7 +239,7 @@ async function validate (docs, componentDirectory, strict) {
 		});
 	}
 
-	const sees = await jsonata(findSees).evaluate(docs[0]);
+	const sees = jsonata(findSees).evaluate(docs[0]);
 	if (sees.tags) {
 		sees.tags.forEach((see, idx) => {
 			if (!validSee.test(see.description)) {
@@ -249,7 +249,7 @@ async function validate (docs, componentDirectory, strict) {
 		});
 	}
 
-	const links = await jsonata(findLinks).evaluate(docs[0]);
+	const links = jsonata(findLinks).evaluate(docs[0]);
 	if (links) {
 		links.forEach(link => {
 			if (!allLinks[link]) {
@@ -610,11 +610,11 @@ function generateIndex (docIndexFile) {
 	console.log('Generating search index...');
 
 	readdirp('src/pages/docs/modules', {fileFilter: '*.json'})
-		.on('data', async (entry) => {
+		.on('data', (entry) => {
 			const filename = entry.fullPath;
 			const json = jsonfile.readFileSync(filename);
 			try {
-				const doc = await jsonata(expression).evaluate(json);
+				const doc = jsonata(expression).evaluate(json);
 				// Because we don't save the source data with the index, we only have access to
 				// the ref (id). Include both the human-readable title and the path to the doc
 				// in the ref so we can parse it later for display.
