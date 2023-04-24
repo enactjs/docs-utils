@@ -2,6 +2,10 @@
 
 The following is a curated list of changes in the Enact docs-utils module, newest changes on the top.
 
+## Unreleased
+
+- Replaced `mkdirp.sync` with `mkdirp.mkdirpSync` after updating `mkdirp` to version 3.0.0
+
 ## [0.4.2] - 2023-04-11
 
 - Fixed `index.js` to be executable
