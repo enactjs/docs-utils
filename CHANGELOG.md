@@ -4,7 +4,7 @@ The following is a curated list of changes in the Enact docs-utils module, newes
 
 ## Unreleased
 
-- Replaced `mkdirp.sync` with `mkdirp.mkdirpSync` after updating `mkdirp` to version 3.0.0
+- Updated `mkdirp` version to 3.0.0 and applied a new API.
 
 ## [0.4.2] - 2023-04-11
 
