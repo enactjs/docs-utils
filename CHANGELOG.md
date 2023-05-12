@@ -4,7 +4,8 @@ The following is a curated list of changes in the Enact docs-utils module, newes
 
 ## [unreleased]
 
-* Updated `jsonata` dependency to version 2.x and refactored code to use async functions.
+- Updated `jsonata` dependency to version 2.x and refactored code to use async functions.
+- Updated `mkdirp` version to 3.0.0 and applied a new API.
 
 ## [0.4.2] - 2023-04-11
 

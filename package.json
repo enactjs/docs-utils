@@ -41,7 +41,7 @@
     "jsonfile": "^6.1.0",
     "markdown-toc": "^1.2.0",
     "minimist": "^1.2.8",
-    "mkdirp": "^1.0.4",
+    "mkdirp": "^3.0.0",
     "progress": "^2.0.3",
     "readdirp": "^3.6.0",
     "shelljs": "^0.8.5"

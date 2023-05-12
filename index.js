@@ -652,7 +652,7 @@ function generateIndex (docIndexFile) {
 }
 
 function makeDataDir () {
-	mkdirp.sync(dataDir);
+	mkdirp.mkdirpSync(dataDir);
 }
 
 function saveLibraryDescriptions (descriptions) {
