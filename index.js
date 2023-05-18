@@ -15,7 +15,7 @@ import jsonata from 'jsonata';
 import jsonfile from 'jsonfile';
 import toc from 'markdown-toc';
 import parseArgs from 'minimist';
-import mkdirp from 'mkdirp';
+import {mkdirpSync} from 'mkdirp';
 import os from 'os';
 import pathModule from 'path';
 import ProgressBar from 'progress';
@@ -650,7 +650,7 @@ export function generateIndex (docIndexFile) {
 }
 
 function makeDataDir () {
-	mkdirp.mkdirpSync(dataDir);
+	mkdirpSync(dataDir);
 }
 
 export function saveLibraryDescriptions (descriptions) {
