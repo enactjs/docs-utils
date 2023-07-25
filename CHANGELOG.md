@@ -2,6 +2,10 @@
 
 The following is a curated list of changes in the Enact docs-utils module, newest changes on the top.
 
+## [0.4.4] - 2023-07-25
+
+- Updated dependencies.
+
 ## [0.4.3] - 2023-06-19
 
 - Updated `jsonata` dependency to version 2.x and refactored code to use async functions.

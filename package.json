@@ -1,7 +1,7 @@
 {
   "name": "@enact/docs-utils",
   "description": "Utilities for parsing and validating JSDoc in Enact projects",
-  "version": "0.4.3",
+  "version": "0.4.4",
   "engines": {
     "node": ">=14"
   },
@@ -34,7 +34,7 @@
   "homepage": "https://github.com/enactjs/docs-utils#readme",
   "dependencies": {
     "chalk": "^4.1.2",
-    "documentation": "^14.0.1",
+    "documentation": "^14.0.2",
     "elasticlunr": "^0.9.5",
     "gray-matter": "^4.0.3",
     "jsonata": "^2.0.3",
@@ -47,6 +47,6 @@
     "shelljs": "^0.8.5"
   },
   "devDependencies": {
-    "eslint": "^8.39.0"
+    "eslint": "^8.45.0"
   }
 }
