@@ -2,6 +2,10 @@
 
 The following is a curated list of changes in the Enact docs-utils module, newest changes on the top.
 
+## [unreleased]
+
+- Updated `chalk` version to 5.3.0.
+
 ## [0.4.4] - 2023-07-25
 
 - Updated dependencies.
