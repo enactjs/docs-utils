@@ -20,11 +20,12 @@ const shelljs = require('shelljs'),
 	mkdirp = require('mkdirp'),
 	toc = require('markdown-toc'),
 	jsonfile = require('jsonfile'),
-	chalk = require('chalk'),
 	matter = require('gray-matter'),
 	parseArgs = require('minimist');
 const documentation = import('documentation');
 
+let chalk;
+import('chalk').then(({default: _chalk}) => {chalk = _chalk;});
 let documentationResponse;
 const generateDocumentationResponse = async () => {
 	documentationResponse = await documentation.then(result => result);
