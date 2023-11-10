@@ -620,6 +620,7 @@ function generateIndex (docIndexFile) {
 				// the ref (id). Include both the human-readable title and the path to the doc
 				// in the ref so we can parse it later for display.
 				doc.id = `${doc.title}|docs/modules/${doc.title}`;
+				index.addDoc(doc);
 			} catch (ex) {
 				console.log(chalk.red(`Error parsing ${entry.path}`));
 				console.log(chalk.red(ex));
@@ -635,7 +636,13 @@ function generateIndex (docIndexFile) {
 			const filename = entry.fullPath;
 			const data = matter.read(filename);
 			const title = data.data.title || pathModule.parse(filename).name;
-			const id = `${title}|${pathModule.relative('src/pages/', pathModule.dirname(filename))}`;
+			let result = '';
+			if (pathModule.parse(filename).name !== 'index') {
+				result = filename.replace(/(.md)$/,'');
+			} else {
+				result = pathModule.dirname(filename);
+			}
+			const id = `${title}|${pathModule.relative('src/pages/', result)}`;
 
 			try {
 				index.addDoc({id, title, description: data.content});
