@@ -638,7 +638,7 @@ function generateIndex (docIndexFile) {
 			const title = data.data.title || pathModule.parse(filename).name;
 			let result = '';
 			if (pathModule.parse(filename).name !== 'index') {
-				result = filename.replace(/(.md)$/,'');
+				result = filename.replace(/(.md)$/, '');
 			} else {
 				result = pathModule.dirname(filename);
 			}
