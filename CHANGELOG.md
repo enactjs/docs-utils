@@ -4,7 +4,7 @@ The following is a curated list of changes in the Enact docs-utils module, newes
 
 ## [unreleased]
 
-- Fixed to find page URL containing keyword when searching docs.
+- Fixed to find the exact path containing keyword when searching docs.
 
 ## [0.4.6] - 2023-09-21
 
