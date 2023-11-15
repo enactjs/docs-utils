@@ -93,7 +93,7 @@ const getValidFiles = (modules, pattern = '*.js') => {
  * @param {boolean} noSave - If `true`, no files are written to disk
  * @returns {Promise[]} - An array of promises that represent the scanning process
  */
-const getDocumentation = (paths, strict, noSave) => {
+const getDocumentation = async (paths, strict, noSave) => {
 	const docOutputPath = pathModule.join('src', 'pages', 'docs', 'modules');
 	// TODO: Add @module to all files and scan files and combine json
 	const validPaths = paths.reduce((prev, path) => {
@@ -109,8 +109,9 @@ const getDocumentation = (paths, strict, noSave) => {
 	const bar = new ProgressBar('Parsing: [:bar] (:current/:total) :file',
 		{total: validPaths.size, width: 20, complete: '#', incomplete: ' '});
 
-	validPaths.forEach(async function (path) {
-		await generateDocumentationResponse();
+	await generateDocumentationResponse();
+
+	validPaths.forEach(function (path) {
 		// TODO: If we do change it to scan each file rather than directory we need to fix componentDirectory matching
 		let componentDirectory;
 		if (os.platform() === 'win32') {
@@ -636,6 +637,7 @@ function generateIndex (docIndexFile) {
 			const filename = entry.fullPath;
 			const data = matter.read(filename);
 			const title = data.data.title || pathModule.parse(filename).name;
+
 			let result = '';
 			if (pathModule.parse(filename).name !== 'index') {
 				result = filename.replace(/(.md)$/, '');
