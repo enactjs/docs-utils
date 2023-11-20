@@ -640,7 +640,7 @@ function generateIndex (docIndexFile) {
 
 			let result = '';
 			if (pathModule.parse(filename).name !== 'index') {
-				result = filename.replace(/(.md)$/, '');
+				result = filename.replace(/(\.md)$/, '');
 			} else {
 				result = pathModule.dirname(filename);
 			}
