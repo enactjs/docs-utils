@@ -61,7 +61,7 @@ module.exports = {
 		'no-new-object': 1,
 		'no-unneeded-ternary': 1,
 		'require-yield': 0,
-		
+
 		// @stylistic/js plugin https://github.com/eslint-stylistic/eslint-stylistic
 		'@stylistic/js/array-bracket-spacing': 1,
 		'@stylistic/js/arrow-spacing': 1,
@@ -86,6 +86,6 @@ module.exports = {
 		'@stylistic/js/space-before-function-paren': [1, 'always'],
 		'@stylistic/js/space-infix-ops': 0,
 		'@stylistic/js/space-unary-ops': [1, {'words': true, 'nonwords': false}],
-		'@stylistic/js/spaced-comment': [1, 'always', {'markers': ['*']}],
+		'@stylistic/js/spaced-comment': [1, 'always', {'markers': ['*']}]
 	}
 };
