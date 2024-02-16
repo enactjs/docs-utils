@@ -2,6 +2,10 @@
 
 The following is a curated list of changes in the Enact docs-utils module, newest changes on the top.
 
+## [unreleased]
+
+- Fixed unexpected failure due to internal async jobs
+
 ## [0.4.7] - 2023-12-15
 
 - Fixed to find the exact path containing keyword when searching docs.
