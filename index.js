@@ -127,14 +127,14 @@ const getDocumentation = async (paths, strict, noSave) => {
 			componentDirectory = componentDirParts.join(os.platform() === 'win32' ? '\\' : '/');
 		}
 
-		promises.push(documentationResponse.build(path, {shallow: true}).then(output => {
+		promises.push(documentationResponse.build(path, {shallow: true}).then(async (output) => {
 			bar.tick({file: componentDirectory});
 			if (output.length) {
 				if (os.platform() === 'win32') {
 					output[0].path[0].name = output[0].path[0].name.replace('/', '\\');
 				}
 
-				validate(output, componentDirectory, strict);
+				await validate(output, componentDirectory, strict);
 
 				if (!noSave) {
 					const outputPath = pathModule.join(basePath, componentDirectory);
