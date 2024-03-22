@@ -6,6 +6,10 @@ The following is a curated list of changes in the Enact docs-utils module, newes
 
 - Replaced deprecated rules with `@stylistic/js` rules.
 
+## [0.4.8] - 2024-02-19
+
+- Fixed unexpected failure due to internal async jobs
+
 ## [0.4.7] - 2023-12-15
 
 - Fixed to find the exact path containing keyword when searching docs.
