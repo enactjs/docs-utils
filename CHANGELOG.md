@@ -2,6 +2,10 @@
 
 The following is a curated list of changes in the Enact docs-utils module, newest changes on the top.
 
+## unreleased
+
+- Replaced deprecated rules with `@stylistic/js` rules.
+
 ## [0.4.9] - 2024-04-03
 
 - Updated dependencies.

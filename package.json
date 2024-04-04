@@ -47,6 +47,7 @@
     "shelljs": "^0.8.5"
   },
   "devDependencies": {
+    "@stylistic/eslint-plugin-js": "^1.5.4",
     "eslint": "^8.57.0"
   }
 }
