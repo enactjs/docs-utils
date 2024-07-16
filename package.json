@@ -46,6 +46,9 @@
     "readdirp": "^3.6.0",
     "shelljs": "^0.8.5"
   },
+  "overrides": {
+    "autolinker": "^4.0.0"
+  },
   "devDependencies": {
     "@stylistic/eslint-plugin-js": "^1.5.4",
     "eslint": "^8.57.0"
