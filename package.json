@@ -37,7 +37,7 @@
     "documentation": "^14.0.3",
     "elasticlunr": "^0.9.5",
     "gray-matter": "^4.0.3",
-    "jsonata": "^2.0.4",
+    "jsonata": "^2.0.5",
     "jsonfile": "^6.1.0",
     "markdown-toc": "^1.2.0",
     "minimist": "^1.2.8",
@@ -45,6 +45,9 @@
     "progress": "^2.0.3",
     "readdirp": "^3.6.0",
     "shelljs": "^0.8.5"
+  },
+  "overrides": {
+    "autolinker": "^4.0.0"
   },
   "devDependencies": {
     "@stylistic/eslint-plugin-js": "^1.5.4",
