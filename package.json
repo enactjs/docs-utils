@@ -3,7 +3,7 @@
   "description": "Utilities for parsing and validating JSDoc in Enact projects",
   "version": "0.4.10",
   "engines": {
-    "node": ">=14"
+    "node": "^18.18.0 || ^20.9.0 || >=21.1.0"
   },
   "main": "index.js",
   "bin": {
@@ -47,10 +47,11 @@
     "shelljs": "^0.8.5"
   },
   "overrides": {
-    "autolinker": "^4.0.0"
+    "autolinker": "^4.0.0",
+    "vue-template-compiler": "@vue/compiler-sfc@3.4.31"
   },
   "devDependencies": {
-    "@stylistic/eslint-plugin-js": "^1.5.4",
+    "@stylistic/eslint-plugin-js": "^2.6.2",
     "eslint": "^8.57.0"
   }
 }
