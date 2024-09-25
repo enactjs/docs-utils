@@ -22,10 +22,10 @@ const shelljs = require('shelljs'),
 	matter = require('gray-matter'),
 	parseArgs = require('minimist');
 const documentation = import('documentation');
-let {readdirp} = require('readdirp');
 
-let chalk;
+let chalk, readdirp;
 import('chalk').then(({default: _chalk}) => {chalk = _chalk;});
+import('readdirp').then(({default: _readdirp}) => {readdirp = _readdirp;});
 let documentationResponse;
 const generateDocumentationResponse = async () => {
 	documentationResponse = await documentation.then(result => result);
