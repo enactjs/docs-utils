@@ -16,13 +16,13 @@ const shelljs = require('shelljs'),
 	ProgressBar = require('progress'),
 	elasticlunr = require('elasticlunr'),
 	jsonata = require('jsonata'),
-	{readdirp} = require('readdirp'),
 	mkdirp = require('mkdirp'),
 	toc = require('markdown-toc'),
 	jsonfile = require('jsonfile'),
 	matter = require('gray-matter'),
 	parseArgs = require('minimist');
 const documentation = import('documentation');
+let {readdirp} = require('readdirp');
 
 let chalk;
 import('chalk').then(({default: _chalk}) => {chalk = _chalk;});
