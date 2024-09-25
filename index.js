@@ -16,6 +16,7 @@ const shelljs = require('shelljs'),
 	ProgressBar = require('progress'),
 	elasticlunr = require('elasticlunr'),
 	jsonata = require('jsonata'),
+	readdirp = require('readdirp'),
 	mkdirp = require('mkdirp'),
 	toc = require('markdown-toc'),
 	jsonfile = require('jsonfile'),
@@ -23,9 +24,8 @@ const shelljs = require('shelljs'),
 	parseArgs = require('minimist');
 const documentation = import('documentation');
 
-let chalk, readdirp;
+let chalk;
 import('chalk').then(({default: _chalk}) => {chalk = _chalk;});
-import('readdirp').then(({default: _readdirp}) => {readdirp = _readdirp;});
 let documentationResponse;
 const generateDocumentationResponse = async () => {
 	documentationResponse = await documentation.then(result => result);
