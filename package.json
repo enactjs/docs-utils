@@ -43,11 +43,12 @@
     "minimist": "^1.2.8",
     "mkdirp": "^3.0.1",
     "progress": "^2.0.3",
-    "readdirp": "^3.6.0",
+    "readdirp": "^4.0.2",
     "shelljs": "^0.8.5"
   },
   "overrides": {
-    "autolinker": "^4.0.0"
+    "autolinker": "^4.0.0",
+    "vue-template-compiler": "@vue/compiler-sfc@3.4.31"
   },
   "devDependencies": {
     "@stylistic/eslint-plugin-js": "^1.5.4",
