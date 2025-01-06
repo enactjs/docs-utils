@@ -2,6 +2,10 @@
 
 The following is a curated list of changes in the Enact docs-utils module, newest changes on the top.
 
+## [unreleased]
+
+- Changed required node to `^18.18.0 || ^20.9.0 || >=21.1.0`
+
 ## [0.4.10] - 2024-07-17
 
 - Replaced deprecated rules with `@stylistic/js` rules.
