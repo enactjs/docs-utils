@@ -5,6 +5,7 @@ The following is a curated list of changes in the Enact docs-utils module, newes
 ## [unreleased]
 
 - Changed required node to `^18.18.0 || ^20.9.0 || >=21.1.0`
+- Updated `eslint` to `^9.17.0`
 
 ## [0.4.10] - 2024-07-17
 
