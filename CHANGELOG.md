@@ -4,7 +4,7 @@ The following is a curated list of changes in the Enact docs-utils module, newes
 
 ## [unreleased]
 
-- Updated `eslint` to version 9
+- Updated `eslint` to v9 and adopted flat config.
 
 ## [0.4.11] - 2025-02-18
 
