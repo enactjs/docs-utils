@@ -16,6 +16,7 @@ const shelljs = require('shelljs'),
 	ProgressBar = require('progress'),
 	elasticlunr = require('elasticlunr'),
 	jsonata = require('jsonata'),
+	{readdirp} = require('readdirp'),
 	mkdirp = require('mkdirp'),
 	toc = require('markdown-toc'),
 	jsonfile = require('jsonfile'),
@@ -24,7 +25,6 @@ const shelljs = require('shelljs'),
 const documentation = import('documentation');
 
 let chalk;
-let {readdirp} = require('readdirp')
 import('chalk').then(({default: _chalk}) => {chalk = _chalk;});
 let documentationResponse;
 const generateDocumentationResponse = async () => {
@@ -611,54 +611,51 @@ function generateIndex (docIndexFile) {
 
 	console.log('Generating search index...');
 
-	readdirp('src/pages/docs/modules', {fileFilter: '*.json'})
-		.on('data', async (entry) => {
-			const filename = entry.fullPath;
-			const json = jsonfile.readFileSync(filename);
-			try {
-				const doc = await jsonata(expression).evaluate(json);
-				// Because we don't save the source data with the index, we only have access to
-				// the ref (id). Include both the human-readable title and the path to the doc
-				// in the ref so we can parse it later for display.
-				doc.id = `${doc.title}|docs/modules/${doc.title}`;
-				index.addDoc(doc);
-			} catch (ex) {
-				console.log(chalk.red(`Error parsing ${entry.path}`));
-				console.log(chalk.red(ex));
-			}
-		})
-		.on('error', (error) => {
-			console.error(chalk.red(error, 'Unable to find parsed documentation!', error));
+	readdirp({root: 'src/pages/docs/modules', fileFilter: '*.json'}, (err, res) => {
+		if (!err) {
+			res.files.forEach(result => {
+				const filename = result.fullPath;
+				const json = jsonfile.readFileSync(filename);
+				try {
+					const doc = jsonata(expression).evaluate(json);
+					// Because we don't save the source data with the index, we only have access to
+					// the ref (id). Include both the human-readable title and the path to the doc
+					// in the ref so we can parse it later for display.
+					doc.id = `${doc.title}|docs/modules/${doc.title}`;
+					index.addDoc(doc);
+				} catch (ex) {
+					console.log(chalk.red(`Error parsing ${result.path}`));	// eslint-disable-line no-console
+					console.log(chalk.red(ex));	// eslint-disable-line no-console
+				}
+			});
+		} else {
+			console.error(chalk.red('Unable to find parsed documentation!'));	// eslint-disable-line no-console
 			process.exit(2);
-		});
+		}
 
-	readdirp('src/pages/', {fileFilter: '*.md'})
-		.on('data', (entry) => {
-			const filename = entry.fullPath;
-			const data = matter.read(filename);
-			const title = data.data.title || pathModule.parse(filename).name;
+		readdirp({root: 'src/pages/', fileFilter: '*.md'}, (_err, _res) => {
+			if (!_err) {
+				_res.files.forEach(result => {
+					const filename = result.fullPath;
+					const data = matter.read(filename);
+					const title = data.data.title || pathModule.parse(filename).name;
+					const id = `${title}|${pathModule.relative('src/pages/', pathModule.dirname(filename))}`;
 
-			let result = '';
-			if (pathModule.parse(filename).name !== 'index') {
-				result = filename.replace(/(\.md)$/, '');
+					try {
+						index.addDoc({id, title, description: data.content});
+					} catch (ex) {
+						console.log(chalk.red(`Error parsing ${result.path}`));	// eslint-disable-line no-console
+						console.log(chalk.red(ex));	// eslint-disable-line no-console
+					}
+				});
+				makeDataDir();
+				jsonfile.writeFileSync(docIndexFile, index.toJSON());
 			} else {
-				result = pathModule.dirname(filename);
+				console.error(chalk.red('Unable to find parsed documentation!'));	// eslint-disable-line no-console
+				process.exit(2);
 			}
-			const id = `${title}|${pathModule.relative('src/pages/', result)}`;
-
-			try {
-				index.addDoc({id, title, description: data.content});
-			} catch (ex) {
-				console.log(chalk.red(`Error parsing ${entry.path}`));
-				console.log(chalk.red(ex));
-			}
-			makeDataDir();
-			jsonfile.writeFileSync(docIndexFile, index.toJSON());
-		})
-		.on('error', (error) => {
-			console.error(chalk.red('Unable to find parsed documentation!', error));
-			process.exit(2);
 		});
+	});
 }
 
 function makeDataDir () {
