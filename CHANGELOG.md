@@ -2,6 +2,10 @@
 
 The following is a curated list of changes in the Enact docs-utils module, newest changes on the top.
 
+## [unreleased]
+
+- Updated `readdirp` to v4.
+
 ## [0.4.13] - 2025-05-15
 
 - Updated dependencies.
