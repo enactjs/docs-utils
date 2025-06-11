@@ -16,7 +16,6 @@ const shelljs = require('shelljs'),
 	ProgressBar = require('progress'),
 	elasticlunr = require('elasticlunr'),
 	jsonata = require('jsonata'),
-	readdirp = require('readdirp'),
 	mkdirp = require('mkdirp'),
 	toc = require('markdown-toc'),
 	jsonfile = require('jsonfile'),
@@ -24,6 +23,7 @@ const shelljs = require('shelljs'),
 	parseArgs = require('minimist');
 const documentation = import('documentation');
 
+let {readdirp} = require('readdirp');
 let chalk;
 import('chalk').then(({default: _chalk}) => {chalk = _chalk;});
 let documentationResponse;
@@ -611,7 +611,7 @@ function generateIndex (docIndexFile) {
 
 	console.log('Generating search index...');
 
-	readdirp('src/pages/docs/modules', {fileFilter: '*.json'})
+	readdirp('src/pages/docs/modules', {fileFilter: (f) => f.basename.endsWith('.json')})
 		.on('data', async (entry) => {
 			const filename = entry.fullPath;
 			const json = jsonfile.readFileSync(filename);
@@ -632,7 +632,7 @@ function generateIndex (docIndexFile) {
 			process.exit(2);
 		});
 
-	readdirp('src/pages/', {fileFilter: '*.md'})
+	readdirp('src/pages/', {fileFilter: (f) => f.basename.endsWith('.md')})
 		.on('data', (entry) => {
 			const filename = entry.fullPath;
 			const data = matter.read(filename);
