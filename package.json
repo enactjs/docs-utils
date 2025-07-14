@@ -51,8 +51,8 @@
     "vue-template-compiler": "@vue/compiler-sfc@3.4.31"
   },
   "devDependencies": {
-    "@stylistic/eslint-plugin-js": "^4.2.0",
-    "eslint": "^9.26.0",
-    "globals": "^16.1.0"
+    "@stylistic/eslint-plugin-js": "^4.4.1",
+    "eslint": "^9.31.0",
+    "globals": "^16.3.0"
   }
 }
