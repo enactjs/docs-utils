@@ -1,7 +1,7 @@
 {
   "name": "@enact/docs-utils",
   "description": "Utilities for parsing and validating JSDoc in Enact projects",
-  "version": "0.4.13",
+  "version": "0.4.14",
   "engines": {
     "node": "^18.18.0 || ^20.9.0 || >=21.1.0"
   },
@@ -43,7 +43,7 @@
     "minimist": "^1.2.8",
     "mkdirp": "^3.0.1",
     "progress": "^2.0.3",
-    "readdirp": "^3.6.0",
+    "readdirp": "^4.1.2",
     "shelljs": "^0.10.0"
   },
   "overrides": {
@@ -51,8 +51,8 @@
     "vue-template-compiler": "@vue/compiler-sfc@3.4.31"
   },
   "devDependencies": {
-    "@stylistic/eslint-plugin-js": "^4.2.0",
-    "eslint": "^9.26.0",
-    "globals": "^16.1.0"
+    "@stylistic/eslint-plugin-js": "^4.4.1",
+    "eslint": "^9.31.0",
+    "globals": "^16.3.0"
   }
 }
