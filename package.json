@@ -33,12 +33,12 @@
   },
   "homepage": "https://github.com/enactjs/docs-utils#readme",
   "dependencies": {
-    "chalk": "^5.4.1",
+    "chalk": "^5.6.2",
     "documentation": "^14.0.3",
     "elasticlunr": "^0.9.5",
     "gray-matter": "^4.0.3",
-    "jsonata": "^2.0.6",
-    "jsonfile": "^6.1.0",
+    "jsonata": "^2.1.0",
+    "jsonfile": "^6.2.0",
     "markdown-toc": "^1.2.0",
     "minimist": "^1.2.8",
     "mkdirp": "^3.0.1",
@@ -52,7 +52,7 @@
   },
   "devDependencies": {
     "@stylistic/eslint-plugin-js": "^4.4.1",
-    "eslint": "^9.31.0",
-    "globals": "^16.3.0"
+    "eslint": "^9.35.0",
+    "globals": "^16.4.0"
   }
 }
