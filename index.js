@@ -94,7 +94,7 @@ const getValidFiles = (modules, pattern = '*.js') => {
  * @returns {Promise[]} - An array of promises that represent the scanning process
  */
 const getDocumentation = async (paths, strict, noSave) => {
-	const docOutputPath = pathModule.join('src', 'pages', 'docs', 'modules');
+	const docOutputPath = pathModule.join('data', 'pages', 'modules');
 	// TODO: Add @module to all files and scan files and combine json
 	const validPaths = paths.reduce((prev, path) => {
 		if (os.platform() === 'win32') {
@@ -611,7 +611,7 @@ function generateIndex (docIndexFile) {
 
 	console.log('Generating search index...');
 
-	readdirp('src/pages/docs/modules', {fileFilter: (f) => f.basename.endsWith('.json')})
+	readdirp('data/docs/modules', {fileFilter: (f) => f.basename.endsWith('.json')})
 		.on('data', async (entry) => {
 			const filename = entry.fullPath;
 			const json = jsonfile.readFileSync(filename);
@@ -632,7 +632,7 @@ function generateIndex (docIndexFile) {
 			process.exit(2);
 		});
 
-	readdirp('src/pages/', {fileFilter: (f) => f.basename.endsWith('.md')})
+	readdirp('data/pages', {fileFilter: (f) => f.basename.endsWith('.md')})
 		.on('data', (entry) => {
 			const filename = entry.fullPath;
 			const data = matter.read(filename);
@@ -644,7 +644,7 @@ function generateIndex (docIndexFile) {
 			} else {
 				result = pathModule.dirname(filename);
 			}
-			const id = `${title}|${pathModule.relative('src/pages/', result)}`;
+			const id = `${title}|${pathModule.relative('data/pages', result)}`;
 
 			try {
 				index.addDoc({id, title, description: data.content});
