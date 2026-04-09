@@ -1,7 +1,7 @@
 {
   "name": "@enact/docs-utils",
   "description": "Utilities for parsing and validating JSDoc in Enact projects",
-  "version": "0.4.16",
+  "version": "0.4.17",
   "engines": {
     "node": "^18.18.0 || ^20.9.0 || >=21.1.0"
   },
@@ -53,6 +53,6 @@
   "devDependencies": {
     "@stylistic/eslint-plugin-js": "^4.4.1",
     "eslint": "^9.39.1",
-    "globals": "^16.5.0"
+    "globals": "^17.4.0"
   }
 }
