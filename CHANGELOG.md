@@ -2,6 +2,10 @@
 
 The following is a curated list of changes in the Enact docs-utils module, newest changes on the top.
 
+## [0.4.17] - 2026-04-09
+
+- Updated dependencies.
+
 ## [0.4.16] - 2026-01-13
 
 - Updated dependencies.
