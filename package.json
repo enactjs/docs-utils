@@ -48,6 +48,7 @@
   },
   "overrides": {
     "autolinker": "^4.0.0",
+    "js-yaml": "^4.2.0",
     "vue-template-compiler": "@vue/compiler-sfc@3.4.31"
   },
   "devDependencies": {
