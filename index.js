@@ -403,7 +403,7 @@ function copyStaticDocs ({source, outputTo: outputBase, icon}) {
 		const sourceWin32 = source.replace('/', '\\');
 		const findCmdDir = `dir ${sourceWin32}\\*docs /S /B /AD`;
 		const docDirs = shelljs.exec(findCmdDir, {silent: true});
-		const dirs = docDirs.stdout.trim().split('\r\n').filter(d => d.length > 0);;
+		const dirs = docDirs.stdout.trim().split('\r\n').filter(d => d.length > 0);
 
 		for (let dir of dirs) {
 			const findCmdFiles = `dir ${dir} /S /B /A-D`;
