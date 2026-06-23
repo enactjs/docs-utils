@@ -420,20 +420,13 @@ function copyStaticDocs ({source, outputTo: outputBase, icon}) {
 		shelljs.mkdir('-p', pathModule.normalize(outputPath));
 
 		if (ext === '.md') {
-			const urlDir = pathModule.relative(pathModule.join('src', 'content', 'docs'), outputPath)
-				.split(pathModule.sep).join('/');
-			const baseUrl = urlDir && urlDir !== '.' && !urlDir.startsWith('..') ? `/${urlDir}/` : '/';
-
 			let contents = fs.readFileSync(file, 'utf8')
 				.replace(/(---\ntitle:.*)\n/, '$1\n' + githubUrl)
-				.replace(/(\((?!http)[^)]+?)(?:\/index)?\.md/g, '$1/')	// strip .md and /index.md, make directory-style URLs
-				.replace(/]\((?!https?:\/\/|\/|#|mailto:)([^)]*)\)/g, (_, relPath) => {
-					const stripped = relPath.replace(/^(\.\.?\/)+/, '');
-					const resolved = /^(modules|developer-guide|developer-tools)/
-						.test(stripped) ? `/${stripped}` : pathModule.posix.resolve(baseUrl, relPath);
-					const final = resolved.replace(/\./g, '').replace(/\/docs\/?$/, '/docs').toLowerCase();
-					return `](${final})`;
-				});
+				.replace(/(\((?!http)[^)]+)(\/index.md)/g, '$1/')		// index files become 'root' for new directory
+				.replace(/(\((?!http)[^)]+)(.md)/g, '$1/');			// other .md files become new directory under root
+			if (file.indexOf('index.md') === -1) {
+				contents = contents.replace(/\]\(\.\//g, '](../');	// same level .md files are now relative to root
+			}
 			fs.writeFileSync(pathModule.join(outputPath, base), contents, {encoding: 'utf8'});
 		} else {
 			shelljs.cp(file, outputPath);
