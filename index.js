@@ -18,7 +18,7 @@ const shelljs = require('shelljs'),
 	jsonata = require('jsonata'),
 	mkdirp = require('mkdirp'),
 	jsonfile = require('jsonfile'),
-	matter = require('gray-matter'),
+	matter = require('@11ty/gray-matter'),
 	parseArgs = require('minimist');
 const documentation = import('documentation');
 
