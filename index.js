@@ -17,7 +17,6 @@ const shelljs = require('shelljs'),
 	elasticlunr = require('elasticlunr'),
 	jsonata = require('jsonata'),
 	mkdirp = require('mkdirp'),
-	toc = require('markdown-toc'),
 	jsonfile = require('jsonfile'),
 	matter = require('gray-matter'),
 	parseArgs = require('minimist');
@@ -318,43 +317,6 @@ function postValidate (strict, ignoreExternal) {
 	});
 }
 
-function parseTableOfContents (frontMatter, body) {
-	let maxdepth = 2;
-	const tocConfig = frontMatter.match(/^toc: ?(\d+)$/m);
-	if (tocConfig) {
-		maxdepth = Number.parseInt(tocConfig[1]);
-	}
-
-	const table = toc(body, {maxdepth});
-	if (table.json.length < 3) {
-		return '';
-	}
-
-	return `
-<nav role="navigation" class="page-toc">
-
-${table.content}
-
-</nav>
-`;
-}
-
-function prependTableOfContents (contents) {
-	let table = '';
-	let frontMatter = '';
-	let body = contents;
-
-	if (contents.startsWith('---')) {
-		const endOfFrontMatter = contents.indexOf('---', 4) + 3;
-		frontMatter = contents.substring(0, endOfFrontMatter);
-		body = contents.substring(endOfFrontMatter);
-
-		table = parseTableOfContents(frontMatter, body);
-	}
-
-	return `${frontMatter}${table}\n${body}`;
-}
-
 /**
  * Loads the docs config (if it exists) or creates a default config object based on best guess.
  * The config object contains information that specifies how other docs information is loaded. It is
@@ -472,7 +434,6 @@ function copyStaticDocs ({source, outputTo: outputBase, icon}) {
 					const final = resolved.replace(/\./g, '').replace(/\/docs\/?$/, '/docs').toLowerCase();
 					return `](${final})`;
 				});
-			contents = prependTableOfContents(contents);
 			fs.writeFileSync(pathModule.join(outputPath, base), contents, {encoding: 'utf8'});
 		} else {
 			shelljs.cp(file, outputPath);

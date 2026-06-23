@@ -39,7 +39,6 @@
     "gray-matter": "^4.0.3",
     "jsonata": "^2.1.0",
     "jsonfile": "^6.2.0",
-    "markdown-toc": "^1.2.0",
     "minimist": "^1.2.8",
     "mkdirp": "^3.0.1",
     "progress": "^2.0.3",
