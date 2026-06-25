@@ -427,6 +427,8 @@ function copyStaticDocs ({source, outputTo: outputBase, icon}) {
 			if (file.indexOf('index.md') === -1) {
 				contents = contents.replace(/\]\(\.\//g, '](../');	// same level .md files are now relative to root
 			}
+
+			contents = contents.replace(/]\((?!https?:\/\/)([^)]+)\)/g, (_, url) => `](${url.toLowerCase()})`);
 			fs.writeFileSync(pathModule.join(outputPath, base), contents, {encoding: 'utf8'});
 		} else {
 			shelljs.cp(file, outputPath);
