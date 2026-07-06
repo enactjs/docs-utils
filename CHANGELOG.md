@@ -2,6 +2,10 @@
 
 The following is a curated list of changes in the Enact docs-utils module, newest changes on the top.
 
+## [0.5.0] - 2026-07-06
+
+- Updated scripts to match the Astro Docs structure.
+
 ## [0.4.18] - 2026-06-23
 
 - Updated dependencies.
