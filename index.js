@@ -43,6 +43,17 @@ const keysToIgnore = ['lineNumber', 'position', 'code', 'loc', 'context', 'path'
 // These are allowed 'errors' in the documentation.  These are our custom tags.
 const allowedErrorTags = ['@curried', '@hoc', '@hocconfig', '@omit', '@required', '@template', '@ui'];
 
+// Directory names whose contents should never be treated as project source: build output, deps,
+// generated samples, tests, etc. This is the single source of truth for that exclusion — used by
+// `getValidFiles` (both the win32 `findstr` and posix `grep` branches) when searching for
+// `@module`-tagged files, by `copyStaticDocs` when searching for generated `docs` output, and by
+// `excludedDirPattern` below, which re-applies the same exclusion to `documentation.build()`'s
+// output: that walk covers every file under a resolved component directory (e.g. `tests/`)
+// regardless of how the directory itself was found, so `getValidFiles`'s exclusion alone isn't
+// enough to keep such files out of the final doclet list.
+const excludedDirs = ['build', 'node_modules', 'sampler', 'samples', 'tests', 'dist', 'coverage'];
+const excludedDirPattern = new RegExp(`[\\\\/](${excludedDirs.join('|')})[\\\\/]`);
+
 /**
  * Scans the specified repos in the `raw` directory for files containing `@module`.
  *
@@ -57,21 +68,17 @@ const getValidFiles = (modules, pattern = '*.js') => {
 	modules.forEach(moduleConfig => {
 		if (os.platform() === 'win32') {
 			let pathWin32 = moduleConfig.path.replace('/', '\\' );
-			cmd = `dir ${pathWin32}\\${pattern} /S /B | findstr /m /F:/ @module /v /i /C:"node_modules" /C:"build" /C:"sampler" /C:"samples"  /C:"tests"  /C:"dist"  /C:"coverage"`;
+			const findstrExcludes = excludedDirs.map(dir => `/C:"${dir}"`).join(' ');
+			cmd = `dir ${pathWin32}\\${pattern} /S /B | findstr /m /F:/ @module /v /i ${findstrExcludes}`;
 
 			moduleFiles = shelljs.exec(cmd, {silent: true});
 			Array.prototype.push.apply(files, moduleFiles.stdout.trim().split('\r\n').filter(Boolean));
 		} else {
+			const grepExcludes = excludedDirs.map(dir => `--exclude-dir=${dir}`).join(' \\\n\t\t\t\t\t');
 			cmd = `
 			grep -r -l "@module" \
 				${moduleConfig.path} \
-				--exclude-dir=build \
-				--exclude-dir=node_modules \
-				--exclude-dir=sampler \
-				--exclude-dir=samples \
-				--exclude-dir=tests \
-				--exclude-dir=dist \
-				--exclude-dir=coverage \
+				${grepExcludes} \
 				--include=${pattern}
 		`;
 			moduleFiles = shelljs.exec(cmd, {silent: true});
@@ -130,6 +137,11 @@ const getDocumentation = async (paths, strict, noSave) => {
 
 		promises.push(documentationResponse.build(path, {shallow: true}).then(async (output) => {
 			bar.tick({file: componentDirectory});
+			// `build()` walks every file under the resolved component directory, including
+			// subdirectories like `tests/` that `getValidFiles` already excluded when searching
+			// for `@module` tags. Re-apply the same exclusion here so a documented test helper,
+			// fixture, etc. doesn't leak in as a spurious extra doclet.
+			output = output.filter((doc) => !excludedDirPattern.test(doc.context.file));
 			if (output.length) {
 				if (os.platform() === 'win32') {
 					output[0].path[0].name = output[0].path[0].name.replace('/', '\\');
@@ -379,7 +391,7 @@ function copyStaticDocs ({source, outputTo: outputBase, icon}) {
 			}
 		}
 	} else {
-		const findIgnores = '-type d -regex \'.*/(node_modules|build|sampler|samples|tests|coverage)\' -prune',
+		const findIgnores = `-type d -regex '.*/(${excludedDirs.join('|')})' -prune`,
 			// MacOS find command uses non-standard -E for regex type
 			findBase = 'find -L' + (os.platform() === 'darwin' ? ' -E' : ''),
 			findTarget = '-type f -path "*/docs/*"';
