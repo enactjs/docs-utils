@@ -43,6 +43,16 @@ const keysToIgnore = ['lineNumber', 'position', 'code', 'loc', 'context', 'path'
 // These are allowed 'errors' in the documentation.  These are our custom tags.
 const allowedErrorTags = ['@curried', '@hoc', '@hocconfig', '@omit', '@required', '@template', '@ui'];
 
+// Doclet `kind`s that represent an actual exported value a component directory could genuinely
+// have more than one of by mistake (e.g. two `@module`-tagged files, or a stray second class).
+// Used to scope the "too many doclets" check below. Everything else `documentation.build()`
+// returns — `member` (an object/interface property; always legitimately attached to *something*,
+// even when that something has no doc comment of its own to root it under) and `typedef`/
+// `interface` (type-only declarations, which commonly live in their own file alongside a module
+// as of the TypeScript migration) is normal to have more than one of and isn't a sign of anything
+// wrong.
+const significantDocletKinds = ['module', 'class', 'function'];
+
 // Directory names whose contents should never be treated as project source: build output, deps,
 // generated samples, tests, etc. This is the single source of truth for that exclusion — used by
 // `getValidFiles` (both the win32 `findstr` and posix `grep` branches) when searching for
@@ -221,9 +231,10 @@ async function validate (docs, componentDirectory, strict) {
 		findLinks = "**[type='link'].url[]";
 		// TODO: findLinks with context: http://try.jsonata.org/BJv4E4UgL
 
-	if (docs.length > 1) {
-		const doclets = docs.map(docNameAndPosition).join('\n');
-		prettyWarn(`Too many doclets (${docs.length}):\n${doclets}`);
+	const significantDocs = docs.filter((doc) => significantDocletKinds.includes(doc.kind));
+	if (significantDocs.length > 1) {
+		const doclets = significantDocs.map(docNameAndPosition).join('\n');
+		prettyWarn(`Too many doclets (${significantDocs.length}):\n${doclets}`);
 	}
 	if ((docs[0].path) && (docs[0].path[0].kind === 'module')) {
 		if (docs[0].path[0].name !== componentDirectory) {
