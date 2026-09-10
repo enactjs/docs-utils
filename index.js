@@ -60,7 +60,7 @@ const getValidFiles = (modules, pattern = '*.js') => {
 			cmd = `dir ${pathWin32}\\${pattern} /S /B | findstr /m /F:/ @module /v /i /C:"node_modules" /C:"build" /C:"sampler" /C:"samples"  /C:"tests"  /C:"dist"  /C:"coverage"`;
 
 			moduleFiles = shelljs.exec(cmd, {silent: true});
-			Array.prototype.push.apply(files, moduleFiles.stdout.trim().split('\r\n'));
+			Array.prototype.push.apply(files, moduleFiles.stdout.trim().split('\r\n').filter(Boolean));
 		} else {
 			cmd = `
 			grep -r -l "@module" \
@@ -75,7 +75,9 @@ const getValidFiles = (modules, pattern = '*.js') => {
 				--include=${pattern}
 		`;
 			moduleFiles = shelljs.exec(cmd, {silent: true});
-			Array.prototype.push.apply(files, moduleFiles.stdout.trim().split('\n'));
+			// See the win32 branch above: filter out the spurious `''` entry a no-match result
+			// produces via `.split('\n')`.
+			Array.prototype.push.apply(files, moduleFiles.stdout.trim().split('\n').filter(Boolean));
 		}
 	});
 
@@ -647,6 +649,19 @@ function init () {
 
 	if (standalone) {
 		const files = getValidFiles([{path}], pattern);
+
+		if (files.length === 0) {
+			console.warn(
+				`validate-docs: no files matching "${pattern || '*.js'}" with an @module tag were ` +
+				`found under "${path}". Nothing was validated — check --path and --pattern.`
+			);
+			// In --strict mode, zero matched files is itself a sign of misconfiguration (wrong
+			// --path/--pattern, or a project whose source moved to a different extension) and
+			// should not silently report success with nothing actually validated.
+			if (strict) process.exitCode = 2;
+			return;
+		}
+
 		getDocumentation(files, strict, true)
 			.then(() => postValidate(strict, true));
 	}
